@@ -1,30 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="ArtifactsWorkspaceSettings">
+    <artifacts-to-build>
+      <artifact name="CatsWarriorsQuest:jar" />
+    </artifacts-to-build>
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="448943a4-fec3-4691-9e52-73467870f58a" name="Default" comment="Добавлен выбор сложности, эпохи и племени при создании новой игры. Написаны функции моста для загрузки, сохранения и создания новой игры. Добавлены файлы массива строк и звуков. Добавлен лаунчер на bash для ОС Linux. Добавлены картинки племен.">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/loc/bolot.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/loc/les.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/loc/tuman.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/loc/vihr.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sound.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/emeshka/Game.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/start.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/strings.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/textures/forest_race_icon.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/textures/mist_race_icon.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/textures/swamp_race_icon.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/textures/wind_race_icon.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kv.css" beforeDir="false" afterPath="$PROJECT_DIR$/kv.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kv.html" beforeDir="false" afterPath="$PROJECT_DIR$/kv.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kv.js" beforeDir="false" afterPath="$PROJECT_DIR$/kv.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/loc/temp.JPG" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/artifacts/CatsWarriorsQuest_jar/CatsWarriorsQuest.jar" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/CatsWarriorsQuest_jar/CatsWarriorsQuest.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/CatsWarriorsQuest/emeshka/Run.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/CatsWarriorsQuest/emeshka/Run.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/emeshka/Run.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/emeshka/Run.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/emeshka/WarriorsBridge.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/emeshka/WarriorsBridge.java" afterDir="false" />
-    </list>
+    <list default="true" id="448943a4-fec3-4691-9e52-73467870f58a" name="Default" comment="" />
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -109,6 +91,24 @@
             <path>
               <item name="CatsWarriorsQuest" type="b2602c69:ProjectViewProjectNode" />
               <item name="CatsWarriorsQuest" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="CatsWarriorsQuest" type="b2602c69:ProjectViewProjectNode" />
+              <item name="CatsWarriorsQuest" type="462c0819:PsiDirectoryNode" />
+              <item name="out" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="CatsWarriorsQuest" type="b2602c69:ProjectViewProjectNode" />
+              <item name="CatsWarriorsQuest" type="462c0819:PsiDirectoryNode" />
+              <item name="out" type="462c0819:PsiDirectoryNode" />
+              <item name="artifacts" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="CatsWarriorsQuest" type="b2602c69:ProjectViewProjectNode" />
+              <item name="CatsWarriorsQuest" type="462c0819:PsiDirectoryNode" />
+              <item name="out" type="462c0819:PsiDirectoryNode" />
+              <item name="artifacts" type="462c0819:PsiDirectoryNode" />
+              <item name="CatsWarriorsQuest_jar" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="CatsWarriorsQuest" type="b2602c69:ProjectViewProjectNode" />
@@ -219,6 +219,14 @@
       <option name="presentableId" value="Default" />
       <updated>1589421767982</updated>
     </task>
+    <task id="LOCAL-00001" summary="Добавлен выбор сложности, эпохи и племени при создании новой игры. Написаны функции моста для загрузки, сохранения и создания новой игры. Добавлены файлы массива строк и звуков. Добавлен лаунчер на bash для ОС Linux. Добавлены картинки племен.">
+      <created>1589482030271</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1589482030271</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -226,7 +234,7 @@
     <layout>
       <window_info anchor="right" id="Palette" order="3" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info active="true" anchor="bottom" id="Messages" order="7" visible="true" weight="0.32946146" />
+      <window_info anchor="bottom" id="Messages" order="7" weight="0.32946146" />
       <window_info anchor="right" id="Palette&#9;" order="3" />
       <window_info id="Image Layers" order="2" />
       <window_info anchor="right" id="Capture Analysis" order="3" />
@@ -237,7 +245,7 @@
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info id="Capture Tool" order="2" />
       <window_info id="Designer" order="2" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info id="UI Designer" order="2" />
