@@ -1,1 +1,2 @@
-java -jar "C:\Users\30028555\IdeaProjects\CatsWarriorsQuest\out\artifacts\CatsWarriorsQuest_jar\CatsWarriorsQuest.jar"
+java -jar "./out/artifacts/CatsWarriorsQuest_jar/CatsWarriorsQuest.jar"
+read -p "Если игра завершилась без ошибок, закрой это окно. Иначе скопируй текст ошибки выше и отправь мне вк"
