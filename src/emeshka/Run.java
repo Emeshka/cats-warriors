@@ -1,13 +1,13 @@
 package emeshka;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import emeshka.webengineapp.Application;
 import emeshka.webengineapp.Bridge;
+import javafx.application.Platform;
 
 public class Run {
     public static Application app = null;
     public static Bridge bridge = null;
+    public static Game currentGame = null;
 
     public static void main(String[] args) {
         bridge = new WarriorsBridge();
@@ -16,5 +16,6 @@ public class Run {
         app.setModalDialogTitleText("Внимание!");
         app.run();
         app.center();
+        Platform.runLater(() -> app.getWv().setContextMenuEnabled(false));
     }
 }
