@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="CatsWarriorsQuest:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/CatsWarriorsQuest_jar</output-path>
+    <root id="archive" name="CatsWarriorsQuest.jar">
+      <element id="module-output" name="CatsWarriorsQuest" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/src/WebEngineApp.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

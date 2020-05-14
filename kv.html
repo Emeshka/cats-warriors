@@ -1,0 +1,21 @@
+<html>
+<head><title></title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<script>	
+		window.onerror = function myErrorHandler(errorMsg, url, lineNumber, colNumber, e) {
+			var stack = (e ? e.stack.replace(/\n/g, "\n\t\t") : '')
+		    alert("java::log()Error occured: " + errorMsg + "\nat line " + lineNumber + " column " + colNumber + " (" + url + ")\n\t\t" + stack);
+		    return false;
+		}
+	</script>
+	<link rel="stylesheet" type="text/css" href="kv.css" onerror="alert('java::log()Error occured during load of '+this.href)">
+	<script src="kv.js" onerror="alert('java::log()Error occured during load of '+this.src)"></script>
+</head>
+<body>
+	<div id="audio"></div>
+	<script>
+	alert("java::onload=true");
+	initialize();
+	</script>
+</body>
+</html>

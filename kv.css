@@ -1,0 +1,27 @@
+body {
+	font-family: Consolas, Lucida Console, Ubuntu, monospace;
+	overflow: hidden;
+	background-size: 100vw auto;
+}
+
+input[type="button"] {
+	font-family: Consolas, Lucida Console, Ubuntu, monospace;
+	background: #bbffbb;
+}
+
+input[type="button"]:hover {
+	background: #ddffdd;
+}
+
+#main_menu {
+	width: 30vw;
+	text-align: center;
+	position: fixed;
+	bottom: 0px;
+	left: 0px;
+}
+
+#main_menu input[type="button"] {
+	width: 90%;
+	margin: 10px;
+}
