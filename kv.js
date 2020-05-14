@@ -45,6 +45,10 @@ function spacer() {
     return div
 }
 
+function receiveLoadedGame(jGame) {
+    loadedGame = JSON.parse(jGame)
+}
+
 function mainMenu() {
     var con = document.body;
     con.style.backgroundImage = "url('textures/main_menu.png')"
@@ -53,10 +57,13 @@ function mainMenu() {
     mm.appendChild(spacer())
     var list = document.createElement('ul');
     list.className = "left_main_menu_panel"
+    var newGameParams = null, newGameStart = null;
     var mainOptions = ['new_game', 'load', 'exit'];
     var onclicks = [
         function () {
-            var newGameParams = document.createElement('div')
+            if (newGameParams || newGameStart) return;
+
+            newGameParams = document.createElement('div')
             newGameParams.className = "right_main_menu_panel"
             var difComment = document.createElement('p')
             difComment.innerHTML = s['difficulty_level']
@@ -140,7 +147,7 @@ function mainMenu() {
             newGameParams.appendChild(raceName)
             newGameParams.appendChild(raceComment)
 
-            var newGameStart = document.createElement('div')
+            newGameStart = document.createElement('div')
             newGameStart.className = "right_main_menu_panel"
             newGameStart.id = 'new_game_start'
             newGameStart.innerHTML = s['start_new_game']
@@ -160,7 +167,7 @@ function mainMenu() {
             mm.appendChild(newGameStart)
         },
         function () {},
-        function () {}
+        function () {java.exit()}
     ];
     for (let i = 0; i<mainOptions.length; i++) {
         var li = document.createElement('li');

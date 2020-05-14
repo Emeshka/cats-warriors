@@ -7,7 +7,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="448943a4-fec3-4691-9e52-73467870f58a" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/strings.js" beforeDir="false" afterPath="$PROJECT_DIR$/strings.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kv.js" beforeDir="false" afterPath="$PROJECT_DIR$/kv.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -76,7 +76,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
+  <component name="ProjectFrameBounds" extendedState="7">
     <option name="x" value="532" />
     <option name="y" value="3" />
     <option name="width" value="1382" />
