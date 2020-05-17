@@ -55,13 +55,21 @@ function mainMenu() {
     var mm = document.createElement('div');
     mm.id = "main_menu"
     mm.appendChild(spacer())
+
+    function savedGameEntry() {
+        let div = document.createElement('div')
+        
+        return div;
+    }
+
     var list = document.createElement('ul');
     list.className = "left_main_menu_panel"
-    var newGameParams = null, newGameStart = null;
+    var newGameParams = null, newGameStart = null, loadGameList = null;
     var mainOptions = ['new_game', 'load', 'exit'];
     var onclicks = [
         function () {
             if (newGameParams || newGameStart) return;
+            if (loadGameList) loadGameList.remove();
 
             newGameParams = document.createElement('div')
             newGameParams.className = "right_main_menu_panel"
@@ -166,7 +174,24 @@ function mainMenu() {
             mm.appendChild(newGameParams)
             mm.appendChild(newGameStart)
         },
-        function () {},
+        function () {
+            if (loadGameList) return;
+            if (newGameParams || newGameStart) {
+                newGameParams.remove();
+                newGameStart.remove();
+            }
+
+            loadGameList = document.createElement('div')
+            loadGameList.className = "right_main_menu_panel"
+            var gamesJArray = java.loadGameList()
+            var gamesArray = gamesJArray ? JSON.parse(gamesJArray) : "null"
+            if (gamesArray) {
+                for (var i = 0; i<gamesArray.length; i++) {
+                    //
+                }
+            }
+            mm.appendChild(loadGameList)
+        },
         function () {java.exit()}
     ];
     for (let i = 0; i<mainOptions.length; i++) {

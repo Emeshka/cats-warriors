@@ -8,9 +8,16 @@
   <component name="ChangeListManager">
     <list default="true" id="448943a4-fec3-4691-9e52-73467870f58a" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/kv.js" beforeDir="false" afterPath="$PROJECT_DIR$/kv.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/artifacts/CatsWarriorsQuest_jar/CatsWarriorsQuest.jar" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/CatsWarriorsQuest_jar/CatsWarriorsQuest.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/CatsWarriorsQuest/WebEngineApp.jar" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/CatsWarriorsQuest/WebEngineApp.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/CatsWarriorsQuest/emeshka/Run.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/CatsWarriorsQuest/emeshka/Run.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/CatsWarriorsQuest/emeshka/WarriorsBridge.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/CatsWarriorsQuest/emeshka/WarriorsBridge.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/WebEngineApp.jar" beforeDir="false" afterPath="$PROJECT_DIR$/src/WebEngineApp.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/emeshka/Run.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/emeshka/Run.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/start_game_windows.bat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/emeshka/WarriorsBridge.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/emeshka/WarriorsBridge.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/start_game_linux.sh" beforeDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -22,11 +29,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Run.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/emeshka/Run.java">
+      <file leaf-file-name="Game.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/emeshka/Game.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="363">
-              <caret line="23" column="61" lean-forward="true" selection-start-line="23" selection-start-column="61" selection-end-line="23" selection-end-column="61" />
+            <state relative-caret-position="142">
+              <caret line="13" selection-start-line="13" selection-end-line="13" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -37,8 +44,8 @@
       <file leaf-file-name="WarriorsBridge.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/emeshka/WarriorsBridge.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="329">
-              <caret line="29" column="45" selection-start-line="29" selection-start-column="45" selection-end-line="29" selection-end-column="45" />
+            <state relative-caret-position="176">
+              <caret line="26" column="10" selection-start-line="26" selection-start-column="10" selection-end-line="26" selection-end-column="10" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -46,13 +53,15 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Game.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/emeshka/Game.java">
+      <file leaf-file-name="Run.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/emeshka/Run.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="142">
-              <caret line="13" selection-start-line="13" selection-end-line="13" />
+            <state relative-caret-position="533">
+              <caret line="41" column="88" selection-start-line="41" selection-start-column="88" selection-end-line="41" selection-end-column="88" />
               <folding>
                 <element signature="imports" expanded="true" />
+                <element signature="e#860#861#0" expanded="true" />
+                <element signature="e#904#905#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -75,15 +84,16 @@
       <list>
         <option value="$PROJECT_DIR$/src/emeshka/Game.java" />
         <option value="$PROJECT_DIR$/src/emeshka/WarriorsBridge.java" />
+        <option value="$PROJECT_DIR$/src/META-INF/MANIFEST.MF" />
         <option value="$PROJECT_DIR$/src/emeshka/Run.java" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="7">
     <option name="x" value="532" />
-    <option name="y" value="3" />
+    <option name="y" value="537" />
     <option name="width" value="1382" />
-    <option name="height" value="1040" />
+    <option name="height" value="506" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -108,6 +118,12 @@
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="emeshka" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="CatsWarriorsQuest" type="b2602c69:ProjectViewProjectNode" />
+              <item name="CatsWarriorsQuest" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="META-INF" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -119,7 +135,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="last_opened_file_path" value="$PROJECT_DIR$/src/WebEngineApp.jar!/" />
-    <property name="project.structure.last.edited" value="Artifacts" />
+    <property name="project.structure.last.edited" value="Problems" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="preferences.editor" />
@@ -140,7 +156,7 @@
     <configuration name="Run" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="emeshka.Run" />
       <module name="CatsWarriorsQuest" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="emeshka.*" />
@@ -217,7 +233,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="7" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info anchor="right" id="Palette" order="3" />
@@ -262,6 +278,8 @@
           <caret line="1" selection-start-line="1" selection-end-line="1" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="e#860#861#0" expanded="true" />
+            <element signature="e#904#905#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -292,6 +310,8 @@
           <caret line="13" column="41" selection-start-line="13" selection-start-column="41" selection-end-line="13" selection-end-column="41" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="e#860#861#0" expanded="true" />
+            <element signature="e#904#905#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -300,16 +320,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
           <caret line="4" column="51" selection-start-line="4" selection-start-column="51" selection-end-line="4" selection-end-column="51" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/emeshka/WarriorsBridge.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="329">
-          <caret line="29" column="45" selection-start-line="29" selection-start-column="45" selection-end-line="29" selection-end-column="45" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -326,12 +336,31 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/emeshka/Run.java">
+    <entry file="file://$PROJECT_DIR$/src/emeshka/WarriorsBridge.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="363">
-          <caret line="23" column="61" lean-forward="true" selection-start-line="23" selection-start-column="61" selection-end-line="23" selection-end-column="61" />
+        <state relative-caret-position="176">
+          <caret line="26" column="10" selection-start-line="26" selection-start-column="10" selection-end-line="26" selection-end-column="10" />
           <folding>
             <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/META-INF/MANIFEST.MF">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="51">
+          <caret line="3" lean-forward="true" selection-start-line="3" selection-end-line="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/emeshka/Run.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="533">
+          <caret line="41" column="88" selection-start-line="41" selection-start-column="88" selection-end-line="41" selection-end-column="88" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#860#861#0" expanded="true" />
+            <element signature="e#904#905#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -355,7 +384,7 @@
       </state>
       <state key="FacetStructureConfigurable.UI">
         <settings>
-          <last-edited>No facets are configured</last-edited>
+          <last-edited />
           <splitter-proportions>
             <option name="proportions">
               <list>
@@ -395,7 +424,6 @@
             <option name="proportions">
               <list>
                 <option value="0.2" />
-                <option value="0.6" />
               </list>
             </option>
           </splitter-proportions>

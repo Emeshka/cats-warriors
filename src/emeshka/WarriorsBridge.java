@@ -23,6 +23,10 @@ public class WarriorsBridge extends DefaultBridge {
         Run.app.execute("receiveLoadedGame('"+gj+"')");
     }
 
+    public void loadGameList() {
+        //
+    }
+
     public void load(String path) {
         try {
             Game g = Game.load(path);

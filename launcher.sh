@@ -1,0 +1,2 @@
+java -jar "./out/artifacts/CatsWarriorsQuest_jar/CatsWarriorsQuest.jar"
+read -p "Если игра завершилась с ошибками, или ты видишь ошибки тут, в консоли, скопируй текст ошибки выше и отправь мне. Иначе закрой это окно."
