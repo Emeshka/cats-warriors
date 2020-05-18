@@ -9,7 +9,7 @@ public class Game {
 
     public void save() throws IOException {
         OutputStream os = new FileOutputStream(path);     //Output file
-        props.store(os, "Cats-Warriors save file.");
+        props.store(os, "Cats-Warriors saved game file.");
     }
 
     public static Game load(String path) throws IOException {

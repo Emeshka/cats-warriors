@@ -20,7 +20,7 @@ public class WarriorsBridge extends DefaultBridge {
         Game g = new Game(difficulty, era, race, season);
         Run.currentGame = g;
         String gj = gson.toJson(g);
-        Run.app.execute("receiveLoadedGame('"+gj+"')");
+        Run.app.callback(gj, "receiveLoadedGame");
     }
 
     public void loadGameList() {
@@ -32,7 +32,7 @@ public class WarriorsBridge extends DefaultBridge {
             Game g = Game.load(path);
             Run.currentGame = g;
             String gj = new Gson().toJson(g);
-            Run.app.execute("receiveLoadedGame('"+gj+"')");
+            Run.app.callback(gj, "receiveLoadedGame");
         } catch (IOException e) {
             Run.app.dialogs().alert(e, "При попытке загрузки игры из файла "+path);
         }

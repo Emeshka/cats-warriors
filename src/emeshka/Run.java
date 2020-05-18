@@ -26,14 +26,6 @@ public class Run {
                 public void paint(Graphics g) {
                     g.drawImage(image, 0, 0, null);
                 }
-                @Override
-                public void update(Graphics g) {
-                    if (app == null || !app.getPageLoaded()) paint(g);
-                    else {
-                        setVisible(false); //you can't see me!
-                        dispose();
-                    }
-                }
             };
             w.setBounds(w.getGraphicsConfiguration().getBounds());
             w.setBackground(new Color(0, true));
@@ -41,8 +33,20 @@ public class Run {
             Rectangle dim = env.getMaximumWindowBounds();
             w.setLocation(dim.width/2-image.getWidth()/2, dim.height/2-image.getHeight()/2);
             w.setVisible(true);
+            w.setAlwaysOnTop(true);
+            for (int i = 0; i<60; i++) {
+                if (app != null && app.getPageLoaded()) {
+                    w.setVisible(false); //you can't see me!
+                    w.dispose();
+                    break;
+                } else {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {}
+                }
+            }
         } catch (IOException e) {
-            System.out.println("splash image failed to load");
+            System.out.println("ERROR: splash image failed to load");
         }
     }
 
