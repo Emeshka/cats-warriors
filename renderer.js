@@ -86,12 +86,74 @@ function createSpacer() {
     return div
 }
 
+// функция, рекурсивно превращающая иерархически структурированный объект data в DOM Element в виде ПДА
+function createPdaElementFromData(data) {
+    let div = document.createElement('div')
+    let leftColumn = document.createElement('div')
+    leftColumn.className = 'pda_left_column'
+    let rightColumn = document.createElement('div')
+    rightColumn.className = 'pda_right_column'
+
+    function articleRecordLink(text) {
+        let entry = document.createElement("div")
+        entry.innerHTML = text;
+        entry.className = 'pda_left_column_entry'
+        return entry;
+    }
+
+    function articleFolder(text) {
+        let entry = document.createElement("div")
+        entry.innerHTML = text;
+        entry.className = 'pda_left_column_entry pda_left_column_entry_class'
+        return entry;
+    }
+
+    var selectedEntry = null;
+    function parseLevel(data, leftColumnContainer) {
+        for (let key in data) {
+            let value = data[key]
+            if (value == 1) {//простая статья в пда
+                let articleLink = articleRecordLink(_(key+'_pda_record'))
+                articleLink.onclick = function() {
+                    rightColumn.innerHTML = _(key+'_pda_article')
+                    this.className = 'pda_left_column_entry pda_left_column_entry_selected';
+                    if (selectedEntry && selectedEntry != this) selectedEntry.className = 'pda_left_column_entry';
+                    selectedEntry = this;
+                };
+                leftColumnContainer.appendChild(articleLink)
+            } else {//папка в пда
+                let articleFolderToggle = articleFolder(_(key+'_pda_folder'))
+                let invisContainer = document.createElement('div')
+                invisContainer.style.display = 'none';
+                invisContainer.className = 'pda_left_column_class_childnodes_block';
+                parseLevel(value, invisContainer)
+                articleFolderToggle.onclick = function() {
+                    if (invisContainer.style.display == 'none') {
+                        invisContainer.style.display = 'block';
+                        this.className += ' pda_left_column_entry_class_opened'
+                    } else {
+                        invisContainer.style.display = 'none';
+                        this.className = 'pda_left_column_entry pda_left_column_entry_class'
+                    }
+                }
+                leftColumnContainer.appendChild(articleFolderToggle)
+                leftColumnContainer.appendChild(invisContainer)
+            }
+        }
+    }
+    parseLevel(data, leftColumn)
+    div.appendChild(leftColumn);
+    div.appendChild(rightColumn);
+    return div;
+}
+
+// загрузочный экран
 function showLoadingGame() {
     let con = document.body;
     con.style.backgroundImage = "url('textures/main_view_bg.jpg')"
     let loading = document.createElement('div')
     loading.innerHTML = _('loading')
-    loading.className = 'main_view_block'
+    loading.className = 'game_view_block'
     loading.style.position = 'absolute';
     loading.style.bottom = '10px';
     loading.style.left = '10px';
@@ -112,12 +174,10 @@ function mainMenu() {
         return div;
     }
 
-    function headerWithHeight(text, height) {
+    function createHeader(text) {
         let header = document.createElement("span")
         header.innerHTML = text
-        header.style.lineHeight = height+'px'
-        header.style.fontSize = height*0.5 + 'px'
-        header.style.fontWeight = 'bold'
+        header.className = 'main_menu_header'
         return header
     }
 
@@ -142,13 +202,11 @@ function mainMenu() {
             }
 
             newGameBlock = document.createElement('div')
-            newGameBlock.className = "main_view_block right_main_menu_panel"
-            let headerHeight = 50;
+            newGameBlock.className = "game_view_block right_main_menu_panel"
             let buttonStartHeight = 30;
             var newGameParams = document.createElement('div')
-            newGameParams.style.overflow = 'auto'
-            newGameParams.style.maxHeight = 'calc(100vh - 60px - '+headerHeight+'px - '+buttonStartHeight+'px)';
-            newGameParams.style.margin = '10px 0px'
+            newGameParams.className = 'main_menu_block_under_header'
+            newGameParams.style.maxHeight = 'calc(100vh - 60px - 50px - '+buttonStartHeight+'px)';
             var difComment = document.createElement('p')
             difComment.innerHTML = _('difficulty_level_1_descr')
             var difficulty = document.createElement('select')
@@ -252,7 +310,7 @@ function mainMenu() {
 
             var newGameStart = document.createElement('div')
             newGameStart.style.borderBottom = '1px solid white';
-            let header = headerWithHeight(_('start_new_game_header'), headerHeight)
+            let header = createHeader(_('start_new_game_header'))
             let button = createButton(_('start_new_game'), function() {
                 let params = {
                     difficulty: difficulty.value,
@@ -296,7 +354,7 @@ function mainMenu() {
             }
 
             loadGameList = document.createElement('div')
-            loadGameList.className = "right_main_menu_panel main_view_block"
+            loadGameList.className = "right_main_menu_panel game_view_block"
             mm.appendChild(loadGameList)
         },
         function () {
@@ -315,7 +373,19 @@ function mainMenu() {
             }
 
             encycBlock = document.createElement('div')
-            encycBlock.className = "right_main_menu_panel main_view_block"
+            encycBlock.className = "right_main_menu_panel game_view_block"
+
+            let header = createHeader(_('encyclopedy_header'))
+            let articleStructure = {
+                'interface': {'main_menu_interface':1, 'game_interface':1},
+                'world': {'basic_warrior_cats_society':1, 'social_structure':1, 'eras':1,
+                        'maps':1, 'groupings':1, 'enemies_and_dangers':1},
+                'gameplay': {'basic_gameplay':1, 'upgrading_character':1, 'quests':1, 'pda':1,
+                        'lifesigns':1, 'reputation':1, 'status':1, 'dialog_history':1, 'map':1}
+            };
+            let pda = createPdaElementFromData(articleStructure)
+            encycBlock.appendChild(header)
+            encycBlock.appendChild(pda)
             mm.appendChild(encycBlock)
         },
         function () {
@@ -334,10 +404,11 @@ function mainMenu() {
             }
 
             credits = document.createElement('div')
-            credits.className = "right_main_menu_panel main_view_block"
-            let header = headerWithHeight(_('credits_header'), 50)
+            credits.className = "right_main_menu_panel game_view_block"
+            let header = createHeader(_('credits_header'))
             credits.appendChild(header)
-            var text = document.createElement('p')
+            var text = document.createElement('div')
+            text.className = 'main_menu_block_under_header'
             fs.readFile(path.join(__dirname, 'CREDITS.txt'), 'utf8', function(err, contents) {
                 if (err) text.innerHTML = err;
                 else text.innerHTML = contents.replace(/\n/g, "<br>");
