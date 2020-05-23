@@ -1,3 +1,25 @@
+/* width */
+::-webkit-scrollbar {
+	width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+	background-color: rgba(0, 0, 0, 0);
+	border-radius: 5px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+	background: #555;
+	border-radius: 5px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+	background: #888;
+}
+
 body {
 	font-family: Consolas, Lucida Console, Ubuntu, monospace;
 	overflow: hidden;
@@ -34,6 +56,15 @@ input[type="button"]:hover {
 	margin: 1vh;
 }
 
+.main_view_block {
+	overflow: auto;
+	padding: 10px;
+	margin: 10px;
+	background-color: rgba(0, 0, 0, 0.7);
+	border-radius: 5px;
+	color: white;
+}
+
 .left_main_menu_panel {
 	width: 30%;
 	display: inline-block;
@@ -44,7 +75,10 @@ input[type="button"]:hover {
 	display: inline-block;
 	vertical-align: middle;
 	padding: 10px;
-	background: #777777;
+	background-color: #333333;
+	max-height: calc(100vh - 40px);
+	overflow: hidden;
+	width: 50vw;
 }
 
 #race_choice {
