@@ -1,3 +1,25 @@
+/* width */
+::-webkit-scrollbar {
+	width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+	background-color: rgba(0, 0, 0, 0);
+	border-radius: 5px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+	background: #555;
+	border-radius: 5px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+	background: #888;
+}
+
 body {
 	font-family: Consolas, Lucida Console, Ubuntu, monospace;
 	overflow: hidden;
@@ -5,6 +27,12 @@ body {
 	background-position: center center;
 	width: 100vw;
 	height: 100vh;
+
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    -webkit-hyphens: auto;
+    hyphens: auto;
 }
 
 img {
@@ -34,6 +62,15 @@ input[type="button"]:hover {
 	margin: 1vh;
 }
 
+.game_view_block {
+	overflow: auto;
+	padding: 10px;
+	margin: 10px;
+	background-color: rgba(0, 0, 0, 0.7);
+	border-radius: 5px;
+	color: white;
+}
+
 .left_main_menu_panel {
 	width: 30%;
 	display: inline-block;
@@ -44,7 +81,10 @@ input[type="button"]:hover {
 	display: inline-block;
 	vertical-align: middle;
 	padding: 10px;
-	background: #777777;
+	background-color: #333333;
+	max-height: calc(100vh - 40px);
+	overflow: hidden;
+	width: 50vw;
 }
 
 #race_choice {
@@ -64,4 +104,68 @@ input[type="button"]:hover {
 .selected_image_option {
 	outline: 2px solid white;
 	background-color: rgba(255, 255, 255, 0.5);
+}
+
+.main_menu_header {
+	line-height: 50px;
+	font-size: 25px;
+	font-weight: bold;
+}
+
+.main_menu_block_under_header {
+	overflow: auto;
+	margin: 10px 0px;
+}
+
+.pda_left_column {
+	width: calc(30% - 5px);
+	display: inline-block;
+	vertical-align: top;
+	padding-right: 5px;
+	overflow: auto;
+	border-right: 1px solid white;
+	height: calc(100vh - 60px - 50px);
+	font-size: 90%;
+}
+
+.pda_right_column {
+	padding: 10px;
+	width: calc(70% - 1px - 20px);
+	display: inline-block;
+	vertical-align: top;
+	height: calc(100vh - 60px - 50px);
+}
+
+.pda_left_column_class_childnodes_block {
+	margin-left:20px;
+}
+
+.pda_left_column_entry {
+	width: 100%;
+	padding: 5px 0px;
+}
+
+.pda_left_column_entry:hover {
+	background-color: rgba(255, 255, 255, 0.1)
+}
+
+.pda_left_column_entry_selected {
+	background-color: rgba(255, 255, 255, 0.2)
+}
+
+.pda_left_column_entry_selected:hover {
+	background-color: rgba(255, 255, 255, 0.3)
+}
+
+.pda_left_column_entry_class {
+	background-image: url('textures/arrow_down_white.png');
+	background-position: right center;
+	background-repeat: no-repeat;
+	background-size: auto 20px;
+	padding-right: 20px;
+	width: calc(100% - 20px);
+}
+
+.pda_left_column_entry_class_opened {
+	background-image: url('textures/arrow_up_white.png');
 }
