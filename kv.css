@@ -53,7 +53,8 @@ input[type="button"]:hover {
 	height: 100vh;
 	position: fixed;
 	top: 0px;
-	left: 0px;
+	right: 0px;
+	text-align: right;
 }
 
 #main_menu input[type="button"] {
@@ -78,6 +79,7 @@ input[type="button"]:hover {
 }
 
 .right_main_menu_panel {
+	text-align: left;
 	display: inline-block;
 	vertical-align: middle;
 	padding: 10px;
@@ -131,9 +133,15 @@ input[type="button"]:hover {
 .pda_right_column {
 	padding: 10px;
 	width: calc(70% - 1px - 20px);
+	max-width: calc(70% - 1px - 20px);
 	display: inline-block;
 	vertical-align: top;
 	height: calc(100vh - 60px - 50px);
+}
+
+.pda_right_column img {
+	max-width: 90%;
+	height: auto;
 }
 
 .pda_left_column_class_childnodes_block {
@@ -143,6 +151,7 @@ input[type="button"]:hover {
 .pda_left_column_entry {
 	width: 100%;
 	padding: 5px 0px;
+	cursor: default;
 }
 
 .pda_left_column_entry:hover {
@@ -168,4 +177,103 @@ input[type="button"]:hover {
 
 .pda_left_column_entry_class_opened {
 	background-image: url('textures/arrow_up_white.png');
+}
+
+.saved_game_entry {
+	height: 46px;
+	width: 100%;
+	padding: 2px 0px;
+	cursor: default;
+}
+
+.saved_game_entry:hover {
+	background-color: rgba(255, 255, 255, 0.1)
+}
+
+.saved_game_entry_selected {
+	background-color: rgba(255, 255, 255, 0.2)
+}
+
+.saved_game_entry_selected:hover {
+	background-color: rgba(255, 255, 255, 0.3)
+}
+
+.saved_game_entry_empty {
+	font-weight: bold;
+	text-align: center;
+	line-height: 50px;
+}
+
+.saved_game_info_part {
+	height: 100%;
+	width: 85%;
+	display: inline-block;
+	vertical-align: top;
+}
+
+.saved_game_img_part {
+	height: 100%;
+	width: 15%;
+	display: inline-block;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center center;
+	vertical-align: top;
+	background-color: #000000;
+}
+
+.saved_game_name {
+	height: 26px;
+	width: 100%;
+	line-height: 20px;
+	font-size: 15px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.saved_game_actor {
+	height: 20px;
+	width: 100%;
+	overflow: hidden;
+}
+
+.saved_game_actor>div, .saved_game_actor>img {
+	margin-right: 5px;
+}
+
+.saved_game_gender {
+	height: 10px;
+	vertical-align: top;
+	width: auto;
+}
+
+.saved_game_actor_name {
+	display: inline-block;
+	vertical-align: top;
+	font-weight: bold;
+	font-size: 13px;
+}
+
+.saved_game_age {
+	display: inline-block;
+	vertical-align: top;
+	font-size: 13px;
+}
+
+.saved_game_timestamp {
+	display: inline-block;
+	vertical-align: top;
+	float: right;
+	color: grey;
+}
+
+.saved_game_date {
+	display: inline-block;
+	vertical-align: top;
+	float: right;
+	font-size: 13px;
+}
+
+.template_variable_emphasis {
+	color: yellow;
 }

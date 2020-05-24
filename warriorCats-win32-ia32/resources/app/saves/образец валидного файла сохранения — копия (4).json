@@ -1,0 +1,16 @@
+{
+	"savedTimestamp": "2020-05-24T08:07:08.209Z",
+	"savedActivityBg": "loc/bolot.png",
+	"date": "2000-04-15T08:05:00.000Z",
+	"actor": {
+		"name": "Грязехвостая",
+		"health": 1,
+		"race": "swamp",
+		"gender": "female",
+		"birthDate": "1998-01-15T04:44:00.000Z"
+	},
+	"era": "new",
+	"difficulty_level": 1,
+	"sublocation": "swamp_camp",
+	"activity": "main_camp_root"
+}
