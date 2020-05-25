@@ -201,7 +201,7 @@ function showLoadingGame() {
 
 function mainMenu() {
     var con = document.body;
-    con.style.backgroundImage = "url('textures/main_menu.png')"
+    con.style.backgroundImage = "url('textures/main_menu.jpg')"
     var mm = document.createElement('div');
     mm.id = "main_menu"
     mm.appendChild(createSpacer())
