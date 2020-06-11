@@ -75,8 +75,8 @@ function startNewGame(params) {
 if (!String.prototype.format) {
     String.prototype.format = function() {
         var args = arguments;
-        return this.replace(/%(\d+)%/g, function(match, number) {
-            return typeof args[number] != 'undefined' ? '<span class="template_variable_emphasis">'+args[number]+"</span>" : match;
+        return this.replace(/{(\d+)}/g, function(match, number) {
+            return typeof args[number*1-1] != 'undefined' ? args[number*1-1] : match;
         });
     };
 }
@@ -84,8 +84,84 @@ if (!String.prototype.format) {
 function printDate(date) {
     let months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december']
     let nth = _('nth_of_' + months[date.getMonth()]).format(date.getDate());
-    let time = _('standard_time_format').format(date.getHours(), date.getMinutes(), date.getSeconds())
+    let time = _('standard_time_format').format(
+        date.getHours() < 10 ? '0'+date.getHours() : date.getHours(), 
+        date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes(), 
+        date.getSeconds() < 10 ? '0'+date.getSeconds() : date.getSeconds())
     return _('standard_date_format').format(date.getFullYear(), nth, time);
+}
+
+function textAtmoDate(date) {
+    switch (date.getMonth()) {
+        case 0: var s2 = 'winter'; var phase = ''; break;
+        case 1: var s2 = 'winter'; var phase = 'later_season'; break;
+        case 2: var s2 = 'spring'; var phase = 'early_season'; break;
+        case 3: var s2 = 'spring'; var phase = ''; break;
+        case 4: var s2 = 'spring'; var phase = 'later_season'; break;
+        case 5: var s2 = 'summer'; var phase = 'early_season'; break;
+        case 6: var s2 = 'summer'; var phase = ''; break;
+        case 7: var s2 = 'summer'; var phase = 'later_season'; break;
+        case 8: var s2 = 'autumn'; var phase = 'early_season'; break;
+        case 9: var s2 = 'autumn'; var phase = ''; break;
+        case 10: var s2 = 'autumn'; var phase = 'later_season'; break;
+        case 11: var s2 = 'winter'; var phase = 'early_season'; break;
+    }
+    if (date.getHours() < 4 || date.getHours() > 22) {
+        var daytime = 'night'
+    } else if (date.getHours() >= 4 && date.getHours() < 10) {
+        var daytime = 'morning'
+    } else if (date.getHours() >= 10 && date.getHours() < 16) {
+        var daytime = 'day'
+    } else {
+        var daytime = 'evening'
+    }
+    return _('atmo_date_format').format(_(phase), _(s2), _(daytime));
+}
+
+function printAtmoDate(date) {
+    switch (date.getMonth()) {
+        case 0: var s = 'winter'; var s2 = 'winter'; var s3 = 'winter'; var phase = ''; break;
+        case 1: var s = 'winter'; var s2 = 'winter'; var s3 = 'spring'; var phase = 'later_season'; break;
+        case 2: var s = 'winter'; var s2 = 'spring'; var s3 = 'spring'; var phase = 'early_season'; break;
+        case 3: var s = 'spring'; var s2 = 'spring'; var s3 = 'spring'; var phase = ''; break;
+        case 4: var s = 'spring'; var s2 = 'spring'; var s3 = 'summer'; var phase = 'later_season'; break;
+        case 5: var s = 'spring'; var s2 = 'summer'; var s3 = 'summer'; var phase = 'early_season'; break;
+        case 6: var s = 'summer'; var s2 = 'summer'; var s3 = 'summer'; var phase = ''; break;
+        case 7: var s = 'summer'; var s2 = 'summer'; var s3 = 'autumn'; var phase = 'later_season'; break;
+        case 8: var s = 'summer'; var s2 = 'autumn'; var s3 = 'autumn'; var phase = 'early_season'; break;
+        case 9: var s = 'autumn'; var s2 = 'autumn'; var s3 = 'autumn'; var phase = ''; break;
+        case 10: var s = 'autumn'; var s2 = 'autumn'; var s3 = 'winter'; var phase = 'later_season'; break;
+        case 11: var s = 'autumn'; var s2 = 'winter'; var s3 = 'winter'; var phase = 'early_season'; break;
+    }
+    if (date.getHours() < 4 || date.getHours() > 22) {
+        var daytime = 'night'
+    } else if (date.getHours() >= 4 && date.getHours() < 10) {
+        var daytime = 'morning'
+    } else if (date.getHours() >= 10 && date.getHours() < 16) {
+        var daytime = 'day'
+    } else {
+        var daytime = 'evening'
+    }
+    let atmoDateTime = document.createElement('div')
+    let atmoDate1 = document.createElement('img')
+    atmoDate1.className = 'atmo_date_time_img'
+    atmoDate1.src = 'textures/'+s+'.png'
+    let atmoDate2 = document.createElement('img')
+    atmoDate2.className = 'atmo_date_time_img'
+    atmoDate2.src = 'textures/'+s2+'.png'
+    let atmoDate3 = document.createElement('img')
+    atmoDate3.className = 'atmo_date_time_img'
+    atmoDate3.src = 'textures/'+s3+'.png'
+    let atmoTime = document.createElement('img')
+    atmoTime.className = 'atmo_date_time_img'
+    atmoTime.src = 'textures/'+daytime+'.png'
+    atmoDateTime.title = _('atmo_date_format').format(_(phase), _(s2), _(daytime));
+    atmoDateTime.appendChild(atmoTime)
+    atmoDateTime.innerHTML += ' - '
+    atmoDateTime.appendChild(atmoDate1)
+    atmoDateTime.appendChild(atmoDate2)
+    atmoDateTime.appendChild(atmoDate3)
+    return atmoDateTime;
 }
 
 function prettyPrintAge(birthDate, currentDate) {
@@ -240,19 +316,25 @@ function mainMenu() {
             age.innerHTML = prettyPrintAge(new Date(game.actor.birthDate), new Date(game.date));
             let gameDate = document.createElement('div');
             gameDate.className = 'saved_game_date';
-            gameDate.innerHTML = printDate(new Date(game.date));
+            gameDate.appendChild(printAtmoDate(new Date(game.date)));
             actorBlock.appendChild(gender)
             actorBlock.appendChild(actorName)
             actorBlock.appendChild(age)
             actorBlock.appendChild(gameDate)
-            actorBlock.title = _('saved_game_actor_block_title').format(game.actor.name, age.innerHTML, gameDate.innerHTML);
+            actorBlock.title = _('saved_game_actor_block_title').format(game.actor.name, age.innerHTML, textAtmoDate(new Date(game.date)));
 
             leftColumn.appendChild(nameBlock)
             leftColumn.appendChild(actorBlock)
 
             rightColumn.style.backgroundImage = "url('"+game.savedActivityBg+"')";
         } else {
-            leftColumn.innerHTML = filename;
+            let corruptedSave = document.createElement('div')
+            corruptedSave.innerHTML = filename+'<br>'+_('error_read_saved_game');
+            corruptedSave.style.verticalAlign = 'middle'
+            corruptedSave.style.display = 'inline-block'
+            leftColumn.appendChild(corruptedSave)
+            leftColumn.appendChild(createSpacer())
+            leftColumn.title = _('error_read_saved_game');
             rightColumn.style.backgroundImage = "url('textures/invalid_saved_game.gif')";
         }
 
@@ -284,7 +366,7 @@ function mainMenu() {
                 if (err) {
                     console.log('Unable to scan directory: ' + err)
                     gameList.innerHTML = _('error_scan_saves_directory');
-                    return
+                    quit();
                 }
                 if (!files.length) {
                     gameList.appendChild(emptySavedEntry())
@@ -304,7 +386,7 @@ function mainMenu() {
                                         && ('sublocation' in object) && ('savedActivityBg' in object)
                                 if (readFileErr || !validJson || !validGame) {
                                     console.log('Unable to read saved game: readFileErr=' + readFileErr + ', validJson=' + validJson + ', validGame=' + validGame)
-                                    entry = savedGameEntry(_('error_read_saved_game'), null, invalidEntryOnclick)
+                                    entry = savedGameEntry(file.name, null, invalidEntryOnclick)
                                     gameList.appendChild(entry)
                                 } else {
                                     entry = savedGameEntry(file.name, object, entryOnclick)
@@ -321,7 +403,7 @@ function mainMenu() {
                 if (err) {
                     console.log('Unable to create directory: ' + err)
                     gameList.innerHTML = _('error_create_saves_directory');
-                    return
+                    quit()
                 }
                 else {
                     gameList.appendChild(emptySavedEntry())
@@ -436,8 +518,8 @@ function mainMenu() {
             var table = document.createElement('table')
             table.id = 'race_choice'
             let cells = [
-                ['swamp', 'wind'],
-                ['forest', 'mist']
+                ['hurricane', 'mist'],
+                ['swamp', 'forest']
             ];
             var selectedRace = ''
             var raceName = document.createElement('h3')

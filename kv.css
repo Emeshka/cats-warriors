@@ -39,13 +39,34 @@ img {
 	image-rendering: auto;
 }
 
+input {
+	image-rendering: pixelated;
+}
+
 input[type="button"] {
 	font-family: Consolas, Lucida Console, Ubuntu, monospace;
-	background: #ffffff;
+	font-size: 110%;
+	color: #000000;
+	background-color: rgba(0,0,0,0);
+	background-image: url('textures/button_stone.png');
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
+	height: 50px;
+	border: none;
+}
+
+input[type="button"]:disabled {
+	color: #000000;
+	background-image: url('textures/button_stone_disabled.png');
+}
+
+input[type="button"]:hover:disabled {
+	color: #000000;
+	background-image: url('textures/button_stone_disabled.png');
 }
 
 input[type="button"]:hover {
-	background: #dddddd;
+	background-image: url('textures/button_stone_hover.png');
 }
 
 #main_menu {
@@ -92,6 +113,7 @@ input[type="button"]:hover {
 #race_choice {
 	table-layout: fixed;
 	border-collapse: collapse;
+	margin: 5px;
 }
 
 .unselected_image_option {
@@ -167,7 +189,7 @@ input[type="button"]:hover {
 }
 
 .pda_left_column_entry_class {
-	background-image: url('textures/arrow_down_white.png');
+	background-image: url('textures/arrow_pda_folder_closed.png');
 	background-position: right center;
 	background-repeat: no-repeat;
 	background-size: auto 20px;
@@ -176,7 +198,7 @@ input[type="button"]:hover {
 }
 
 .pda_left_column_entry_class_opened {
-	background-image: url('textures/arrow_up_white.png');
+	background-image: url('textures/arrow_pda_folder_opened.png');
 }
 
 .saved_game_entry {
@@ -184,6 +206,7 @@ input[type="button"]:hover {
 	width: 100%;
 	padding: 2px 0px;
 	cursor: default;
+	overflow: hidden;
 }
 
 .saved_game_entry:hover {
@@ -206,14 +229,14 @@ input[type="button"]:hover {
 
 .saved_game_info_part {
 	height: 100%;
-	width: 85%;
+	width: 87%;
 	display: inline-block;
 	vertical-align: top;
 }
 
 .saved_game_img_part {
 	height: 100%;
-	width: 15%;
+	width: 13%;
 	display: inline-block;
 	background-size: contain;
 	background-repeat: no-repeat;
@@ -238,7 +261,7 @@ input[type="button"]:hover {
 }
 
 .saved_game_actor>div, .saved_game_actor>img {
-	margin-right: 5px;
+	margin-right: 10px;
 }
 
 .saved_game_gender {
@@ -270,10 +293,19 @@ input[type="button"]:hover {
 .saved_game_date {
 	display: inline-block;
 	vertical-align: top;
-	float: right;
+	height: 100%;
 	font-size: 13px;
+	float: right;
 }
 
-.template_variable_emphasis {
-	color: yellow;
+.saved_game_date div {
+	vertical-align: top;
+	height: 100%;
+}
+
+.atmo_date_time_img {
+	height: 100%;
+	vertical-align: top;
+	width: auto;
+	margin-right: -10px;
 }
