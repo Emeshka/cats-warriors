@@ -97,6 +97,7 @@ input[type="button"]:hover {
 	width: 30%;
 	display: inline-block;
 	vertical-align: middle;
+	list-style-type: none;
 }
 
 .right_main_menu_panel {
@@ -189,7 +190,7 @@ input[type="button"]:hover {
 }
 
 .pda_left_column_entry_class {
-	background-image: url('textures/arrow_pda_folder_closed.png');
+	background-image: url('textures/arrow_help_folder_closed.png');
 	background-position: right center;
 	background-repeat: no-repeat;
 	background-size: auto 20px;
@@ -198,7 +199,78 @@ input[type="button"]:hover {
 }
 
 .pda_left_column_entry_class_opened {
-	background-image: url('textures/arrow_pda_folder_opened.png');
+	background-image: url('textures/arrow_help_folder_opened.png');
+}
+
+.tbook_left_column {
+	padding: 15px;
+	width: calc(30vh - 30px);
+	height: calc(67vh - 30px);
+	position: absolute;
+	left: 0px;
+	top: 16.5vh;
+	overflow: auto;
+	font-size: 90%;
+	background-image: url('textures/piece_of_paper.png');
+	background-position: left center;
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+	image-rendering: pixelated;
+}
+
+.tbook_right_column {
+	padding: 3vh 9vh;
+	width: calc(100.5vh - 6vh);
+	height: calc(67vh - 6vh);
+	position: absolute;
+	left: calc(30vh + ((100vw - 130.5vh) / 2));
+	top: 16.5vh;
+	background-image: url('textures/travelersbookopen.png');
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+	image-rendering: pixelated;
+}
+
+.tbook_right_column img {
+	max-width: 90%;
+	height: auto;
+	image-rendering: auto;
+}
+
+.tbook_left_column_class_childnodes_block {
+	margin-left:20px;
+}
+
+.tbook_left_column_entry {
+	width: 60%;
+	padding: 5px 0px;
+	cursor: default;
+}
+
+.tbook_left_column_entry:hover {
+	background-color: rgba(0, 0, 0, 0.05)
+}
+
+.tbook_left_column_entry_selected {
+	background-color: rgba(0, 0, 0, 0.1)
+}
+
+.tbook_left_column_entry_selected:hover {
+	background-color: rgba(0, 0, 0, 0.15)
+}
+
+.tbook_left_column_entry_class {
+	background-image: url('textures/arrow_tbook_folder_closed.png');
+	background-position: right center;
+	background-repeat: no-repeat;
+	background-size: auto 20px;
+	padding-right: 20px;
+	width: calc(60% - 20px);
+}
+
+.tbook_left_column_entry_class_opened {
+	background-image: url('textures/arrow_tbook_folder_opened.png');
 }
 
 .saved_game_entry {
@@ -308,4 +380,23 @@ input[type="button"]:hover {
 	vertical-align: top;
 	width: auto;
 	margin-right: -10px;
+}
+
+.tbook_view {
+	width: 100vw;
+	height: 100vh;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+}
+
+.effect_layer {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	width: 100vw;
+	height: 100vh;
+	background-size: cover;
+	background-position: center center;
+	background-repeat: no-repeat;
 }

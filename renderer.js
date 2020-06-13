@@ -24,7 +24,7 @@ function quit() {
 }
 
 const sound = {};
-sound.ids = {}
+sound.tagsByName = {}
 fs.readdir(path.join(__dirname, 'sound'), function(err, files) {
     if (err) {
         console.log('Unable to scan directory: ' + err);
@@ -33,33 +33,144 @@ fs.readdir(path.join(__dirname, 'sound'), function(err, files) {
     } 
     files.forEach(function(file) {
         let fileName = file.substring(0, file.length - 4)
-        sound.ids[fileName] = fileName
+        sound.tagsByName[fileName] = null
     });
 });
 sound.container = document.createElement("div")
 document.body.appendChild(sound.container)
-sound.increment = 0;
-sound.play = function(name) {
+sound.play = function(name, singleInstance, loop, fadein, fadeoutOnEnd) {
     function makeSound(s) {
-        if (sound.increment > 1000) sound.increment = 0;
         let elem = document.createElement("audio");
-        elem.setAttribute("id", s+"_"+sound.increment);
         elem.setAttribute("src", "sound/"+s+".mp3");
         elem.setAttribute("preload", "auto");
-        elem.setAttribute("onended", "this.remove();");
-        sound.increment++;
         return elem;
     }
 
-    let id = sound.ids[name];
-    let previous = document.getElementById(id);
-    if (previous && previous.currentTime != 0.0 || !previous) {
-        let newSound = makeSound(name);
-        sound.container.appendChild(newSound);
-        newSound.play();
-        sound.ids[name] = newSound.id;
-    } else if (previous) {
-        previous.play();
+    let instance = sound.tagsByName[name];
+    if (instance) {
+        log('Refused to make sound "'+name+'": is already running as single-instance')
+        return;
+    }
+    let tag = makeSound(name);
+    sound.container.appendChild(tag);
+    if (singleInstance) sound.tagsByName[name] = tag;
+
+    if (loop) tag.loop = true;
+    else tag.setAttribute("onended", "this.remove();");
+
+    var fadeOutPoint = tag.duration - fadeoutOnEnd
+    if (!loop && fadeoutOnEnd > 0) {
+        tag.addEventListener('timeupdate', function(){
+            if (tag.currentTime >= fadeOutPoint)
+            var fadeOut = setInterval(function() {
+                if (tag && sound.container.contains(tag) && (tag.volume > 0.01)) {
+                    if (!tag.paused) tag.volume -= 0.01;
+                } else {
+                    tag.volume = 0.0
+                    clearInterval(fadeOut);
+                }
+            }, (fadeoutOnEnd*1000)/100);
+        }, )
+    }
+
+    if (fadein > 0) {
+        tag.volume = 0.0;
+        tag.addEventListener('playing', function() {
+            var fadeIn = setInterval(function() {
+                if (tag && sound.container.contains(tag) && (tag.volume < 0.99)) {
+                    log(tag.volume)
+                    if (!tag.paused) tag.volume += 0.01;
+                } else {
+                    tag.volume = 1.0
+                    clearInterval(fadeIn);
+                }
+            }, (fadein*1000)/100);
+        })
+    }
+    tag.play();
+}
+sound.clearSingleInstance = function(name, fadeout) {
+    let tag = sound.tagsByName[name];
+    if (tag) {
+        if (fadeout > 0) {
+            var fadeOut = setInterval(function() {
+                if (tag && sound.container.contains(tag) && (tag.volume > 0.01)) {
+                    if (!tag.paused) tag.volume -= 0.01;
+                } else {
+                    tag.volume = 0.0
+                    clearInterval(fadeOut);
+                    if (tag) {
+                        tag.pause();
+                        tag.currentTime = 0;
+                        tag.remove();
+                    }
+                }
+            }, (fadeout*1000)/100);
+        } else {
+            tag.pause();
+            tag.currentTime = 0;
+            tag.remove();
+            sound.tagsByName[name] = null;
+        }
+    } else log('Tried to clear single-instance sound that doesn\'t exist: "'+name+'"');
+}
+sound.setLoopSingleInstance = function(name, loop) {
+    let tag = sound.tagsByName[name];
+    if (tag) tag.loop = !!loop;
+    else log('Tried to set loop of single-instance sound that doesn\'t exist: "'+name+'"');
+}
+sound.pauseSingleInstance = function(name, fadeout) {
+    let tag = sound.tagsByName[name];
+    if (tag) {
+        if (fadeout > 0) {
+            var fadeOut = setInterval(function() {
+                if (tag && sound.container.contains(tag) && (tag.volume > 0.01)) {
+                    if (!tag.paused) tag.volume -= 0.01;
+                } else {
+                    tag.volume = 0.0
+                    clearInterval(fadeOut);
+                    if (tag) tag.pause();
+                }
+            }, (fadeout*1000)/100);
+        } else tag.pause();
+    } else log('Tried to pause single-instance sound that doesn\'t exist: "'+name+'"');
+}
+sound.resumeSingleInstance = function(name, fadein) {
+    let tag = sound.tagsByName[name];
+    if (tag) {
+        if (fadein > 0) {
+            tag.volume = 0.0;
+            tag.addEventListener('playing', function() {
+                var fadeIn = setInterval(function() {
+                    if (tag && sound.container.contains(tag) && (tag.volume < 0.99)) {
+                        if (!tag.paused) tag.volume += 0.01;
+                    } else {
+                        tag.volume = 1.0
+                        clearInterval(fadeIn);
+                    }
+                }, (fadein*1000)/100);
+            })
+            tag.play();
+        } else tag.play();
+    } else log('Tried to resume single-instance sound that doesn\'t exist: "'+name+'"');
+}
+sound.clearAll = function() {
+    let con = sound.container.children;
+    for (let i = 0; i<con.length; i++) {
+        con[i].pause();
+        con[i].remove();
+    }
+}
+sound.pauseAll = function() {
+    let con = sound.container.children;
+    for (let i = 0; i<con.length; i++) {
+        con[i].pause();
+    }
+}
+sound.resumeAll = function() {
+    let con = sound.container.children;
+    for (let i = 0; i<con.length; i++) {
+        con[i].play();
     }
 }
 
@@ -200,67 +311,6 @@ function createSpacer() {
     return div
 }
 
-// функция, рекурсивно превращающая иерархически структурированный объект data в DOM Element в виде ПДА
-function createPdaElementFromData(data) {
-    let div = document.createElement('div')
-    let leftColumn = document.createElement('div')
-    leftColumn.className = 'pda_left_column'
-    let rightColumn = document.createElement('div')
-    rightColumn.className = 'pda_right_column'
-
-    function articleRecordLink(text) {
-        let entry = document.createElement("div")
-        entry.innerHTML = text;
-        entry.className = 'pda_left_column_entry'
-        return entry;
-    }
-
-    function articleFolder(text) {
-        let entry = document.createElement("div")
-        entry.innerHTML = text;
-        entry.className = 'pda_left_column_entry pda_left_column_entry_class'
-        return entry;
-    }
-
-    var selectedEntry = null;
-    function parseLevel(data, leftColumnContainer) {
-        for (let key in data) {
-            let value = data[key]
-            if (value == 1) {//простая статья в пда
-                let articleLink = articleRecordLink(_(key+'_pda_record'))
-                articleLink.onclick = function() {
-                    rightColumn.innerHTML = _(key+'_pda_article').replace(/\n/g, "<br>")
-                    this.className = 'pda_left_column_entry pda_left_column_entry_selected';
-                    if (selectedEntry && selectedEntry != this) selectedEntry.className = 'pda_left_column_entry';
-                    selectedEntry = this;
-                };
-                leftColumnContainer.appendChild(articleLink)
-            } else {//папка в пда
-                let articleFolderToggle = articleFolder(_(key+'_pda_folder'))
-                let invisContainer = document.createElement('div')
-                invisContainer.style.display = 'none';
-                invisContainer.className = 'pda_left_column_class_childnodes_block';
-                parseLevel(value, invisContainer)
-                articleFolderToggle.onclick = function() {
-                    if (invisContainer.style.display == 'none') {
-                        invisContainer.style.display = 'block';
-                        this.className += ' pda_left_column_entry_class_opened'
-                    } else {
-                        invisContainer.style.display = 'none';
-                        this.className = 'pda_left_column_entry pda_left_column_entry_class'
-                    }
-                }
-                leftColumnContainer.appendChild(articleFolderToggle)
-                leftColumnContainer.appendChild(invisContainer)
-            }
-        }
-    }
-    parseLevel(data, leftColumn)
-    div.appendChild(leftColumn);
-    div.appendChild(rightColumn);
-    return div;
-}
-
 // загрузочный экран
 function showLoadingGame() {
     let con = document.body;
@@ -276,11 +326,83 @@ function showLoadingGame() {
 }
 
 function mainMenu() {
+    setTimeout(function() {
+        log('cucucu')
+        sound.play('main_menu_loop', true, true, 2)
+    }, 1000)
     var con = document.body;
     con.style.backgroundImage = "url('textures/main_menu.jpg')"
+    var effectLayer = document.createElement('div')
+    effectLayer.className = 'effect_layer'
+    effectLayer.style.opacity = '0.7'
+    effectLayer.style.backgroundImage = "url('effects/wind_dust.webp')"
+    con.appendChild(effectLayer)
     var mm = document.createElement('div');
     mm.id = "main_menu"
     mm.appendChild(createSpacer())
+
+    // функция, рекурсивно превращающая иерархически структурированный объект data в DOM Element в виде ПДА
+    function createPdaElementFromData(data, type, preopened) {
+        let div = document.createElement('div')
+        div.style.height = '100%'
+        let leftColumn = document.createElement('div')
+        leftColumn.className = type+'_left_column'
+        let rightColumn = document.createElement('div')
+        rightColumn.className = type+'_right_column'
+
+        function articleRecordLink(text) {
+            let entry = document.createElement("div")
+            entry.innerHTML = text;
+            entry.className = type+'_left_column_entry'
+            return entry;
+        }
+
+        function articleFolder(text) {
+            let entry = document.createElement("div")
+            entry.innerHTML = text;
+            entry.className = type+'_left_column_entry '+type+'_left_column_entry_class'
+            return entry;
+        }
+
+        var selectedEntry = null;
+        function parseLevel(data, leftColumnContainer) {
+            for (let key in data) {
+                let value = data[key]
+                if (value == 1) {//простая статья в пда
+                    let articleLink = articleRecordLink(_(key+'_pda_record'))
+                    articleLink.onclick = function() {
+                        rightColumn.innerHTML = _(key+'_pda_article').replace(/\n/g, "<br>")
+                        this.className = type+'_left_column_entry '+type+'_left_column_entry_selected';
+                        if (selectedEntry && selectedEntry != this) selectedEntry.className = type+'_left_column_entry';
+                        selectedEntry = this;
+                    };
+                    leftColumnContainer.appendChild(articleLink)
+                } else {//папка в пда
+                    let articleFolderToggle = articleFolder(_(key+'_pda_folder'))
+                    let invisContainer = document.createElement('div')
+                    invisContainer.style.display = 'none';
+                    invisContainer.className = type+'_left_column_class_childnodes_block';
+                    parseLevel(value, invisContainer)
+                    articleFolderToggle.onclick = function() {
+                        if (invisContainer.style.display == 'none') {
+                            invisContainer.style.display = 'block';
+                            this.className += ' '+type+'_left_column_entry_class_opened'
+                        } else {
+                            invisContainer.style.display = 'none';
+                            this.className = type+'_left_column_entry '+type+'_left_column_entry_class'
+                        }
+                    }
+                    leftColumnContainer.appendChild(articleFolderToggle)
+                    leftColumnContainer.appendChild(invisContainer)
+                }
+            }
+        }
+        parseLevel(data, leftColumn)
+        if (preopened) rightColumn.innerHTML = _(preopened+'_pda_article').replace(/\n/g, "<br>")
+        div.appendChild(leftColumn);
+        div.appendChild(rightColumn);
+        return div;
+    }
 
     var selectedSavedGame = null;
     function savedGameEntry(filename, game, entryOnclick) {
@@ -422,8 +544,8 @@ function mainMenu() {
 
     var list = document.createElement('ul');
     list.className = "left_main_menu_panel"
-    var newGameBlock = null, loadGameList = null, encycBlock = null, credits = null;
-    var mainOptions = ['new_game', 'load', 'encyclopedy', 'credits', 'exit'];
+    var newGameBlock = null, loadGameList = null, helpBlock = null, credits = null;
+    var mainOptions = ['new_game', 'load', 'tbook', 'help', 'credits', 'exit'];
     var onclicks = [
         function () {
             if (newGameBlock) return;
@@ -436,9 +558,9 @@ function mainMenu() {
                 credits.remove();
                 credits = null;
             }
-            if (encycBlock) {
-                encycBlock.remove();
-                encycBlock = null;
+            if (helpBlock) {
+                helpBlock.remove();
+                helpBlock = null;
             }
 
             newGameBlock = document.createElement('div')
@@ -614,9 +736,9 @@ function mainMenu() {
                 credits.remove();
                 credits = null;
             }
-            if (encycBlock) {
-                encycBlock.remove();
-                encycBlock = null;
+            if (helpBlock) {
+                helpBlock.remove();
+                helpBlock = null;
             }
 
             loadGameList = document.createElement('div')
@@ -664,7 +786,22 @@ function mainMenu() {
             mm.insertBefore(loadGameList, mm.firstChild)
         },
         function () {
-            if (encycBlock) return;
+            mm.remove()
+
+            var tbookBlock = document.createElement('div')
+            tbookBlock.className = "tbook_view"
+
+            let articleStructure = {
+                'about_tbook':1,
+                'world': {'basic_warrior_cats_society':1, 'social_structure':1, 'eras':1,
+                        'maps':1, 'groupings':1, 'enemies_and_dangers':1}
+            };
+            let pda = createPdaElementFromData(articleStructure, 'tbook', 'about_tbook')
+            tbookBlock.appendChild(pda)
+            con.appendChild(tbookBlock)
+        },
+        function () {
+            if (helpBlock) return;
             if (newGameBlock) {
                 newGameBlock.remove();
                 newGameBlock = null;
@@ -679,21 +816,19 @@ function mainMenu() {
                 credits = null;
             }
 
-            encycBlock = document.createElement('div')
-            encycBlock.className = "right_main_menu_panel game_view_block"
+            helpBlock = document.createElement('div')
+            helpBlock.className = "right_main_menu_panel game_view_block"
 
-            let header = createHeader(_('encyclopedy_header'))
+            let header = createHeader(_('help_header'))
             let articleStructure = {
                 'interface': {'main_menu_interface':1, 'game_interface':1},
-                'world': {'basic_warrior_cats_society':1, 'social_structure':1, 'eras':1,
-                        'maps':1, 'groupings':1, 'enemies_and_dangers':1},
-                'gameplay': {'basic_gameplay':1, 'upgrading_character':1, 'quests':1, 'pda':1,
+                'gameplay': {'basic_gameplay':1, 'upgrading_character':1, 'quests':1,
                         'lifesigns':1, 'reputation':1, 'status':1, 'dialog_history':1, 'map':1}
             };
-            let pda = createPdaElementFromData(articleStructure)
-            encycBlock.appendChild(header)
-            encycBlock.appendChild(pda)
-            mm.insertBefore(encycBlock, mm.firstChild)
+            let pda = createPdaElementFromData(articleStructure, 'pda')
+            helpBlock.appendChild(header)
+            helpBlock.appendChild(pda)
+            mm.insertBefore(helpBlock, mm.firstChild)
         },
         function () {
             if (credits) return;
@@ -706,9 +841,9 @@ function mainMenu() {
                 loadGameList = null;
                 selectedSavedGame = null;
             }
-            if (encycBlock) {
-                encycBlock.remove();
-                encycBlock = null;
+            if (helpBlock) {
+                helpBlock.remove();
+                helpBlock = null;
             }
 
             credits = document.createElement('div')
@@ -743,4 +878,3 @@ function mainMenu() {
 }
 
 mainMenu();
-log('init.')
