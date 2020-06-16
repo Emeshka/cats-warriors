@@ -81,7 +81,6 @@ sound.play = function(name, singleInstance, loop, fadein, fadeoutOnEnd) {
         tag.addEventListener('playing', function() {
             var fadeIn = setInterval(function() {
                 if (tag && sound.container.contains(tag) && (tag.volume < 0.99)) {
-                    log(tag.volume)
                     if (!tag.paused) tag.volume += 0.01;
                 } else {
                     tag.volume = 1.0
@@ -372,7 +371,10 @@ function mainMenu() {
                 pageNum += 2
                 if (pageNum >= _(currentArticle+'_pda_article').split('<endpage>').length) {
                     let nextArticleIndex = articleList.indexOf(currentArticle)+1
-                    if (nextArticleIndex >= articleList.length) return;
+                    if (nextArticleIndex >= articleList.length) {
+                        pageNum -= 2
+                        return;
+                    }
                     currentArticle = articleList[nextArticleIndex]
                     pageNum = 0
                 }
@@ -385,7 +387,10 @@ function mainMenu() {
                 pageNum -= 2
                 if (pageNum < 0) {
                     let prevArticleIndex = articleList.indexOf(currentArticle)-1
-                    if (prevArticleIndex < 0) return;
+                    if (prevArticleIndex < 0) {
+                        pageNum += 2
+                        return;
+                    }
                     currentArticle = articleList[prevArticleIndex]
                     pageNum = _(currentArticle+'_pda_article').split('<endpage>').length - 1
                     pageNum = (pageNum % 2 == 0) ? pageNum : pageNum-1
@@ -427,6 +432,8 @@ function mainMenu() {
                         if (type == 'pda') {
                             getPdaArticle(key)
                         } else {
+                            currentArticle = key
+                            pageNum = 0
                             getTbookArticle(key)
                         }
                         this.className = type+'_left_column_entry '+type+'_left_column_entry_selected';
