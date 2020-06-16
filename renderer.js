@@ -341,7 +341,7 @@ function mainMenu() {
     var effectLayer = document.createElement('div')
     effectLayer.className = 'effect_layer'
     effectLayer.style.opacity = '0.7'
-    effectLayer.style.backgroundImage = "url('effects/wind_dust.webp')"
+    //effectLayer.style.backgroundImage = "url('effects/wind_dust.webp')"
     con.appendChild(effectLayer)
     var mm = document.createElement('div');
     mm.id = "main_menu"
@@ -350,7 +350,6 @@ function mainMenu() {
     // функция, рекурсивно превращающая иерархически структурированный объект data в DOM Element в виде ПДА
     function createPdaElementFromData(data, type, preopened) {
         let div = document.createElement('div')
-        div.style.height = '100%'
         let leftColumn = document.createElement('div')
         leftColumn.className = type+'_left_column'
         let rightColumn = document.createElement('div')

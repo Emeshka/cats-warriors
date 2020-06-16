@@ -165,6 +165,8 @@ input[type="button"]:hover {
 .pda_right_column img {
 	max-width: 90%;
 	height: auto;
+	max-height: 90%;
+	vertical-align: middle;
 }
 
 .pda_left_column_class_childnodes_block {
@@ -209,7 +211,6 @@ input[type="button"]:hover {
 	width: 100vw;
 	height: 100vh;
 	text-align: center;
-	font-size: 0.7vw;
 	image-rendering: pixelated;
 }
 
@@ -220,8 +221,8 @@ input[type="button"]:hover {
 	padding: 1vw 3vw 1vw 2vw;
 	width: calc(20vw - 5vw);
 	height: calc(40vw - 2vw);
-	max-width: calc(50vh - 5vw);
-	max-height: calc(100vh - 2vw);
+	max-width: calc(40vh - 5vw);
+	max-height: calc(80vh - 2vw);
 
 	overflow: auto;
 	text-align: left;
@@ -229,7 +230,7 @@ input[type="button"]:hover {
 	background-position: left center;
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
-    transform: rotate(2deg);
+    transform: rotate(3deg);
 }
 
 .tbook_right_column {
@@ -251,9 +252,10 @@ input[type="button"]:hover {
 }
 
 .tbook_right_column img {
-	max-width: 90%;
+	max-width: 100%;
 	height: auto;
-	image-rendering: auto;
+	max-height: 100%;
+	vertical-align: middle;
 }
 
 .tbook_left_column_class_childnodes_block {
@@ -293,18 +295,54 @@ input[type="button"]:hover {
 
 .tbook_page {
 	white-space: pre-wrap;
-	width: calc(28vw - 7vw);
-	height: calc(36vw - 3vw);
 	display: inline-block;
-	overflow: auto;
+	overflow: visible;
+	position: relative;
+	vertical-align: top;
 }
 
-.tbook_lpage {
-	margin: 3vw 0vw 0vw 7vw;
+@media screen and (max-aspect-ratio: 24/10) {
+	.tbook_book div {
+		font-size: 0.8vw;
+	}
+
+	.tbook_lpage {
+		max-width: calc(71vh - 7vw);
+		width: calc(28vw - 7vw);
+		height: calc(36vw - 3vw);
+		max-height: calc(90vh - 3vw);
+		margin: 3vw 0vw 0vw 7vw;
+	}
+
+	.tbook_rpage {
+		max-width: calc(71vh - 5vw);
+		width: calc(26vw - 5vw);
+		height: calc(36vw - 3vw);
+		max-height: calc(90vh - 3vw);
+		margin: 3vw 0vw 0vw 5vw;
+	}
 }
 
-.tbook_rpage {
-	margin: 3vw 0vw 0vw 5vw;
+@media screen and (min-aspect-ratio: 24/10) {
+	.tbook_book div {
+		font-size: 1.9vh;
+	}
+
+	.tbook_lpage {
+		max-width: calc(64vh - 17vh);
+		width: calc(28vw - 17vh);
+		height: calc(36vw - 6vh);
+		max-height: calc(90vh - 6vh);
+		margin: 6vh 0vw 0vw 17vh;
+	}
+
+	.tbook_rpage {
+		max-width: calc(64vh - 14vh);
+		width: calc(26vw - 14vh);
+		height: calc(36vw - 6vh);
+		max-height: calc(90vh - 6vh);
+		margin: 6vh 0vw 0vw 14vh;
+	}
 }
 
 .tbook_next {
