@@ -202,34 +202,52 @@ input[type="button"]:hover {
 	background-image: url('textures/arrow_help_folder_opened.png');
 }
 
-.tbook_left_column {
-	padding: 15px;
-	width: calc(30vh - 30px);
-	height: calc(67vh - 30px);
+.tbook_book {
 	position: absolute;
 	left: 0px;
-	top: 16.5vh;
-	overflow: auto;
-	font-size: 90%;
-	background-image: url('textures/piece_of_paper.png');
-	background-position: left center;
-	background-repeat: no-repeat;
-	background-size: 100% 100%;
+	top: 0px;
+	width: 100vw;
+	height: 100vh;
+	text-align: center;
+	/*font-size: 0.7vw;*/
 	image-rendering: pixelated;
 }
 
+.tbook_left_column {
+	vertical-align: middle;
+	display: inline-block;
+	margin-left: 5vw;
+	padding: 1vw 3vw 1vw 2vw;
+	width: calc(20vw - 5vw);
+	height: calc(40vw - 2vw);
+	max-width: calc(50vh - 5vw);
+	max-height: calc(100vh - 2vw);
+
+	overflow: auto;
+	text-align: left;
+	background-image: url('textures/piece_of_paper_light.png'), url('textures/piece_of_paper_shadow.png');
+	background-position: left center;
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+    transform: rotate(2deg);
+}
+
 .tbook_right_column {
-	padding: 3vh 9vh;
-	width: calc(100.5vh - 6vh);
-	height: calc(67vh - 6vh);
-	position: absolute;
-	left: calc(30vh + ((100vw - 130.5vh) / 2));
-	top: 16.5vh;
-	background-image: url('textures/travelersbookopen.png');
+	vertical-align: middle;
+	display: inline-block;
+	position: relative;
+	width: 60vw;
+	height: 42vw;
+	max-width: 142vh;
+	max-height: 100vh;
+
+	overflow: hidden;
+	text-align: left;
+	background-image: url('textures/travelersbookopened_light.png'), url('textures/travelersbookopened_shadow.png');
 	background-position: center center;
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
-	image-rendering: pixelated;
+    transform: rotate(-2deg);
 }
 
 .tbook_right_column img {
@@ -271,6 +289,40 @@ input[type="button"]:hover {
 
 .tbook_left_column_entry_class_opened {
 	background-image: url('textures/arrow_tbook_folder_opened.png');
+}
+
+.tbook_page {
+	white-space: pre-wrap;
+	width: calc(28vw - 7vw);
+	height: calc(36vw - 3vw);
+	display: inline-block;
+	overflow: auto;
+}
+
+.tbook_lpage {
+	margin: 3vw 0vw 0vw 7vw;
+}
+
+.tbook_rpage {
+	margin: 3vw 0vw 0vw 5vw;
+}
+
+.tbook_next {
+	position: absolute;
+	right: 0px;
+	top: 0px;
+	width: 6vw;
+	height: 39vw;
+	cursor: pointer;
+}
+
+.tbook_previous {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	width: 6vw;
+	height: 39vw;
+	cursor: pointer;
 }
 
 .saved_game_entry {
@@ -383,11 +435,7 @@ input[type="button"]:hover {
 }
 
 .tbook_view {
-	width: 100vw;
-	height: 100vh;
-	position: absolute;
-	left: 0px;
-	top: 0px;
+	background-image: url('textures/travelersbook_bg.jpg');
 }
 
 .effect_layer {
@@ -397,6 +445,18 @@ input[type="button"]:hover {
 	width: 100vw;
 	height: 100vh;
 	background-size: cover;
+	background-position: center center;
+	background-repeat: no-repeat;
+}
+
+.tbook_back_btn {
+	background-image: url('textures/arrow_back.png');
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	width: 64px;
+	height: 64px;
+	background-size: contain;
 	background-position: center center;
 	background-repeat: no-repeat;
 }

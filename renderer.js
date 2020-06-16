@@ -24,6 +24,9 @@ function quit() {
 }
 
 const sound = {};
+sound.container = document.createElement("div")
+document.body.appendChild(sound.container)
+sound.ready = false
 sound.tagsByName = {}
 fs.readdir(path.join(__dirname, 'sound'), function(err, files) {
     if (err) {
@@ -35,9 +38,9 @@ fs.readdir(path.join(__dirname, 'sound'), function(err, files) {
         let fileName = file.substring(0, file.length - 4)
         sound.tagsByName[fileName] = null
     });
+    sound.container.dispatchEvent(new Event('soundsystemready'))
+    sound.ready = true
 });
-sound.container = document.createElement("div")
-document.body.appendChild(sound.container)
 sound.play = function(name, singleInstance, loop, fadein, fadeoutOnEnd) {
     function makeSound(s) {
         let elem = document.createElement("audio");
@@ -326,10 +329,14 @@ function showLoadingGame() {
 }
 
 function mainMenu() {
-    setTimeout(function() {
-        log('cucucu')
-        sound.play('main_menu_loop', true, true, 2)
-    }, 1000)
+    if (sound.ready) {
+        if (!sound.tagsByName['main_menu_loop']) sound.play('main_menu_loop', true, true, 2)
+    } else {
+        sound.container.addEventListener('soundsystemready', function() {
+            sound.play('main_menu_loop', true, true, 2)
+            sound.container.removeEventListener('soundsystemready', arguments.callee);
+        })
+    }
     var con = document.body;
     con.style.backgroundImage = "url('textures/main_menu.jpg')"
     var effectLayer = document.createElement('div')
@@ -349,6 +356,44 @@ function mainMenu() {
         leftColumn.className = type+'_left_column'
         let rightColumn = document.createElement('div')
         rightColumn.className = type+'_right_column'
+        var articleList = [];
+        if (type == 'tbook') {
+            var page1 = document.createElement('div')
+            page1.className = 'tbook_page tbook_lpage'
+            rightColumn.appendChild(page1)
+            var page2 = document.createElement('div')
+            page2.className = 'tbook_page tbook_rpage'
+            rightColumn.appendChild(page2)
+            var pageNum = 0;
+            var currentArticle = '';
+            var next = document.createElement('div')
+            next.className = 'tbook_next'
+            next.onclick = function() {
+                pageNum += 2
+                if (pageNum >= _(currentArticle+'_pda_article').split('<endpage>').length) {
+                    let nextArticleIndex = articleList.indexOf(currentArticle)+1
+                    if (nextArticleIndex >= articleList.length) return;
+                    currentArticle = articleList[nextArticleIndex]
+                    pageNum = 0
+                }
+                getTbookArticle(currentArticle)
+            }
+            rightColumn.appendChild(next)
+            var previous = document.createElement('div')
+            previous.className = 'tbook_previous'
+            previous.onclick = function() {
+                pageNum -= 2
+                if (pageNum < 0) {
+                    let prevArticleIndex = articleList.indexOf(currentArticle)-1
+                    if (prevArticleIndex < 0) return;
+                    currentArticle = articleList[prevArticleIndex]
+                    pageNum = _(currentArticle+'_pda_article').split('<endpage>').length - 1
+                    pageNum = (pageNum % 2 == 0) ? pageNum : pageNum-1
+                }
+                getTbookArticle(currentArticle)
+            }
+            rightColumn.appendChild(previous)
+        }
 
         function articleRecordLink(text) {
             let entry = document.createElement("div")
@@ -365,18 +410,31 @@ function mainMenu() {
         }
 
         var selectedEntry = null;
+        function getPdaArticle(key) {
+            rightColumn.innerHTML = _(key+'_pda_article').replace(/\n/g, "<br>")
+        }
+        function getTbookArticle(key) {
+            let fullText = _(key+'_pda_article').replace(/\n/g, "<br>").split('<endpage>')
+            page1.innerHTML = fullText[pageNum]
+            page2.innerHTML = fullText[pageNum+1] ? fullText[pageNum+1] : ''
+        }
         function parseLevel(data, leftColumnContainer) {
             for (let key in data) {
                 let value = data[key]
                 if (value == 1) {//простая статья в пда
                     let articleLink = articleRecordLink(_(key+'_pda_record'))
                     articleLink.onclick = function() {
-                        rightColumn.innerHTML = _(key+'_pda_article').replace(/\n/g, "<br>")
+                        if (type == 'pda') {
+                            getPdaArticle(key)
+                        } else {
+                            getTbookArticle(key)
+                        }
                         this.className = type+'_left_column_entry '+type+'_left_column_entry_selected';
                         if (selectedEntry && selectedEntry != this) selectedEntry.className = type+'_left_column_entry';
                         selectedEntry = this;
                     };
                     leftColumnContainer.appendChild(articleLink)
+                    if (type == 'tbook') articleList.push(key)
                 } else {//папка в пда
                     let articleFolderToggle = articleFolder(_(key+'_pda_folder'))
                     let invisContainer = document.createElement('div')
@@ -398,9 +456,21 @@ function mainMenu() {
             }
         }
         parseLevel(data, leftColumn)
-        if (preopened) rightColumn.innerHTML = _(preopened+'_pda_article').replace(/\n/g, "<br>")
-        div.appendChild(leftColumn);
-        div.appendChild(rightColumn);
+        if (preopened) {
+            if (type == 'pda') {
+                getPdaArticle(preopened)
+            } else {
+                getTbookArticle(preopened)
+                currentArticle = preopened
+            }
+        }
+        if (type == 'tbook') {
+            div.appendChild(rightColumn);
+            div.appendChild(leftColumn);
+        } else {
+            div.appendChild(leftColumn);
+            div.appendChild(rightColumn);
+        }
         return div;
     }
 
@@ -787,9 +857,10 @@ function mainMenu() {
         },
         function () {
             mm.remove()
+            effectLayer.remove()
 
             var tbookBlock = document.createElement('div')
-            tbookBlock.className = "tbook_view"
+            tbookBlock.className = "tbook_view effect_layer"
 
             let articleStructure = {
                 'about_tbook':1,
@@ -797,7 +868,16 @@ function mainMenu() {
                         'maps':1, 'groupings':1, 'enemies_and_dangers':1}
             };
             let pda = createPdaElementFromData(articleStructure, 'tbook', 'about_tbook')
+            pda.className = 'tbook_book';
+            pda.appendChild(createSpacer())
             tbookBlock.appendChild(pda)
+            let backBtn = document.createElement('div')
+            backBtn.className = 'tbook_back_btn'
+            backBtn.onclick = function() {
+                tbookBlock.remove();
+                mainMenu();
+            }
+            tbookBlock.appendChild(backBtn)
             con.appendChild(tbookBlock)
         },
         function () {
