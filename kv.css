@@ -84,6 +84,13 @@ input[type="button"]:hover {
 	margin: 1vh;
 }
 
+.loading_screen {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    width: calc(100vw - 40px);
+}
+
 .game_view_block {
 	overflow: auto;
 	padding: 10px;

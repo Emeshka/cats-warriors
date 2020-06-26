@@ -17,7 +17,8 @@ function _(key) {
 
 document.title = _('app_name')
 
-const sound = require(path.join(__dirname, 'sound.js'))
+window.sound = require(path.join(__dirname, 'sound.js'))
+const game = require(path.join(__dirname, 'game.js'))
 
 function quit() {
     const remote = require('electron').remote
@@ -26,12 +27,6 @@ function quit() {
 }
 
 /* ------------------------------------------------------------------------------- */
-
-var world = null
-
-function startNewGame(params) {
-    //
-}
 
 // First, checks if it isn't implemented yet.
 if (!String.prototype.format) {
@@ -44,7 +39,8 @@ if (!String.prototype.format) {
 }
 
 function printDate(date) {
-    let months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december']
+    let months = ['january', 'february', 'march', 'april', 'may', 'june', 'july',
+        'august', 'september', 'october', 'november', 'december']
     let nth = _('nth_of_' + months[date.getMonth()]).format(date.getDate());
     let time = _('standard_time_format').format(
         date.getHours() < 10 ? '0'+date.getHours() : date.getHours(), 
@@ -163,17 +159,17 @@ function createSpacer() {
 }
 
 // загрузочный экран
-function showLoadingGame() {
+function loadingScreen() {
     let con = document.body;
-    con.style.backgroundImage = "url('textures/main_view_bg.jpg')"
+    con.style.backgroundImage = "url('textures/trilobite.jpg')"
     let loading = document.createElement('div')
     loading.innerHTML = _('loading')
-    loading.className = 'game_view_block'
-    loading.style.position = 'absolute';
-    loading.style.bottom = '10px';
-    loading.style.left = '10px';
-    loading.style.width = 'calc(100vw - 40px)'
+    loading.className = 'loading_screen game_view_block'
     con.appendChild(loading)
+}
+
+function removeLoadingScreen() {
+    con.children[0].remove();
 }
 
 function mainMenu() {
@@ -368,7 +364,8 @@ function mainMenu() {
             actorBlock.appendChild(actorName)
             actorBlock.appendChild(age)
             actorBlock.appendChild(gameDate)
-            actorBlock.title = _('saved_game_actor_block_title').format(game.actor.name, age.innerHTML, textAtmoDate(new Date(game.date)));
+            actorBlock.title = _('saved_game_actor_block_title')
+                .format(game.actor.name, age.innerHTML, textAtmoDate(new Date(game.date)));
 
             leftColumn.appendChild(nameBlock)
             leftColumn.appendChild(actorBlock)
@@ -429,10 +426,12 @@ function mainMenu() {
                                     console.log(parseError)
                                     validJson = false
                                 }
-                                let validGame = ('savedTimestamp' in object) && ('date' in object) && ('actor' in object)
-                                        && ('sublocation' in object) && ('savedActivityBg' in object)
+                                let validGame = ('savedTimestamp' in object) && ('date' in object) 
+                                    && ('actor' in object) && ('sublocation' in object) 
+                                    && ('savedActivityBg' in object)
                                 if (readFileErr || !validJson || !validGame) {
-                                    console.log('Unable to read saved game: readFileErr=' + readFileErr + ', validJson=' + validJson + ', validGame=' + validGame)
+                                    console.log('Unable to read saved game: readFileErr=' + readFileErr
+                                        + ', validJson=' + validJson + ', validGame=' + validGame)
                                     entry = savedGameEntry(file.name, null, invalidEntryOnclick)
                                     gameList.appendChild(entry)
                                 } else {
@@ -632,8 +631,8 @@ function mainMenu() {
                 }
                 if (params.gender && params.difficulty && params.era && params.race && params.season) {
                     mm.remove()
-                    showLoadingGame()
-                    startNewGame(params)
+                    loadingScreen()
+                    game.startNewGame(params)
                 } else {
                     let warnings = _('warning_not_enough_data_new_game');
                     if (!params.gender) warnings += '\n' + _('warning_enter_gender');
@@ -698,7 +697,38 @@ function mainMenu() {
             }, '40%', '30px')
             deleteButton.setAttribute('disabled', 'disabled')
             let loadButton = createButton(_('load_saved_game'), function() {
-                //load game
+                mm.remove()
+                loadingScreen()
+                let filepath = selectedSavedGame.dataset.path;
+                fs.readFile(filepath, 'utf-8', function(readFileErr, content) {
+                    let object = {}, validJson = true;
+                    try {
+                        object = JSON.parse(content)
+                    } catch (parseError) {
+                        console.log(parseError)
+                        validJson = false
+                    }
+                    if (readFileErr || !validJson) {
+                        if (readFileErr) {
+                            alert(_('error_load_saved_game_io').format(readFileErr, filepath))
+                            console.log(readFileErr)
+                        } else if (!validJson) {
+                            alert(_('error_load_saved_game_corrupted').format(filepath))
+                        }
+                        removeLoadingScreen();
+                        mainMenu();
+                    } else {
+                        try {
+                            game.loadGame()
+                            sound.clearSingleInstance('main_menu_loop');
+                        } catch (corrupted) {
+                            alert(_('error_load_saved_game_corrupted').format(filepath))
+                            removeLoadingScreen();
+                            mainMenu();
+                        }
+                    }
+                });
+                selectedSavedGame = null;
             }, '40%', '30px')
             loadButton.setAttribute('disabled', 'disabled')
             let headerDiv = document.createElement('div')
