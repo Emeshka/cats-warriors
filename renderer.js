@@ -122,9 +122,7 @@ function printAtmoDate(date) {
     return atmoDateTime;
 }
 
-function prettyPrintAge(birthDate, currentDate) {
-    let monthsAmount = (currentDate.getTime() - birthDate.getTime()) / (1000*60*60*24*30)
-    let str = '';
+function prettyPrintAge(monthsAmount) {
     if (monthsAmount >= 12) {
         let yearsAmount = monthsAmount / 12
         monthsAmount = monthsAmount % 12
@@ -133,6 +131,10 @@ function prettyPrintAge(birthDate, currentDate) {
         str = _('age_n_months').format(Math.floor(monthsAmount))
     }
     return str
+}
+
+var getAge = function(birthDate, currentDate) {
+    return (currentDate.getTime() - birthDate.getTime()) / (1000*60*60*24*30)
 }
 
 /* ------------------------------------------------------------------------------- */
@@ -356,7 +358,7 @@ function mainMenu() {
             actorName.innerHTML = game.actor.name;
             let age = document.createElement('div');
             age.className = 'saved_game_age';
-            age.innerHTML = prettyPrintAge(new Date(game.actor.birthDate), new Date(game.date));
+            age.innerHTML = prettyPrintAge(getAge(new Date(game.actor.birthDate), new Date(game.date)));
             let gameDate = document.createElement('div');
             gameDate.className = 'saved_game_date';
             gameDate.appendChild(printAtmoDate(new Date(game.date)));
@@ -428,7 +430,7 @@ function mainMenu() {
                                 }
                                 let validGame = ('savedTimestamp' in object) && ('date' in object) 
                                     && ('actor' in object) && ('sublocation' in object) 
-                                    && ('savedActivityBg' in object)
+                                    && ('savedActivityBg' in object) && ('map' in object)
                                 if (readFileErr || !validJson || !validGame) {
                                     console.log('Unable to read saved game: readFileErr=' + readFileErr
                                         + ', validJson=' + validJson + ', validGame=' + validGame)
