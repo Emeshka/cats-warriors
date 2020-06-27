@@ -24,7 +24,13 @@ var allels = {
 	},
 	tabby: {
 		options: ['a', 'Ta', 'Tb'],
-		combine: geneDominant
+		combine: function(options, a1, a2, otherGenes) {
+			if (otherGenes.get('mainColor') == 'r') {
+				if (a1 == 'a') a1 = 'Ta'
+				if (a2 == 'a') a2 = 'Ta'
+			}
+			return geneDominant(options, a1, a2)
+		}
 	},
 	dilute: {
 		options: ['DD', 'd'],
@@ -32,7 +38,10 @@ var allels = {
 	},
 	browning: {
 		options: ['b0', 'bl', 'b'],
-		combine: geneDominant
+		combine: function(options, a1, a2, otherGenes) {
+			if (otherGenes.get('mainColor') == 'r') return 'b'
+			return geneDominant(options, a1, a2)
+		}
 	},
 	spots: {
 		options: ['s', 'S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8'],
@@ -49,7 +58,7 @@ var allels = {
 		}
 	},
 	height: {
-		options: ['short', 'mid', 'long'],
+		options: ['short', 'averageheight', 'long'],
 		combine: geneAverage
 	}
 }
@@ -62,11 +71,17 @@ function generateName(exterior) {
 	return 'temp name'
 }
 
+// создание персонажа (ГГ или НПС)
 function createCharacter(params) {
 	let ch = {}
-	// создание персонажа (ГГ или НПС)
+    ch.health = 1 // здоровье (потом разбить на составляющие)
+    ch.actionPower = 1 // максимальная сила, с которой можно выполнить действие (усталость мышц)
+    ch.muscularity = 0 // накачанность мышц (достигается тренировками)
+    ch.satiety = 1 // сытость
+    ch.water = 1 // потребность в воде
+    ch.freshness = 1 // выспанность, бодрость (потребность во сне)
+
     ch.gender = params.gender
-    ch.health = 1
     ch.race = params.race
     ch.birthDate = params.birthDate
     ch.status = params.status
@@ -103,16 +118,58 @@ function bindCharacterMethods(ch) {
 		let arr = ch.exterior[geneName]
 		return allels[geneName].combine(allels[geneName].options, arr[0], arr[1], ch.exterior)
 	}
+	ch.exterior.getModel = function() {
+		let model = 'models/colors/'
+		let eyes = 'models/eyes/'
+		let spots = 'models/spots/'
+
+		let bodyShape = ''
+		//+длина шерсти, лицо
+		bodyShape += ch.exterior.get('height') + '-'
+
+		if (ch.muscularity < 0.33) bodyShape += 'тощий-'
+		else if (ch.muscularity < 0.75) bodyShape += 'норм-'
+		else bodyShape += 'athlete-'
+
+		let age = ch.getAge()
+		if (age < 0.4) bodyShape += 'слепойкотенок'
+		else if (age < 4) bodyShape += '3месячный'
+		else if (age < 12*12) bodyShape += 'adult'
+		else bodyShape += 'старый'
+
+		let w = ch.exterior.get('white')
+		if (w == 'W') {
+			model += w
+		} else {
+			model += ch.exterior.get('mainColor') + '-'
+			model += ch.exterior.get('browning') + '-'
+			model += ch.exterior.get('dilute') + '-'
+			model += ch.exterior.get('tabby') + '-'
+		}
+		model += bodyShape
+		model += '.png'
+
+		eyes += ch.exterior.get('eyesShade') + '-'
+		eyes += bodyShape
+		eyes += '.png'
+
+		let s = ch.exterior.get('spots')
+		if (s == 's') {
+			spots = ''
+		} else {
+			spots += s + '-'
+			spots += bodyShape
+			spots += '.png'
+		}
+		return {
+			model: model,
+			spots: spots,
+			eyes: eyes
+		}
+	}
 }
 
 exports.startNewGame = function(params) {
-	/*
-    gender: selectedGender,
-    difficulty: difficulty.value,
-    era: selectedEra,
-    race: selectedRace,
-    season: season.value
-    */
     // базовые свойства игры
     game = {}
     game.savedTimestamp = null
@@ -155,4 +212,8 @@ exports.startNewGame = function(params) {
 
 exports.loadGame = function(gameObj) {
     //
+}
+
+exports.stringifyCurrentGame = function() {
+	return JSON.stringify(game)
 }
