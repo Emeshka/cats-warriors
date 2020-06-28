@@ -57,6 +57,10 @@ var allels = {
 			} else return geneAverage(options, a1, a2)
 		}
 	},
+	fur: {
+		options: ['shortfur', 'averagefur', 'longfur'],
+		combine: geneAverage
+	},
 	height: {
 		options: ['short', 'averageheight', 'long'],
 		combine: geneAverage
@@ -74,20 +78,19 @@ function generateName(exterior) {
 // создание персонажа (ГГ или НПС)
 function createCharacter(params) {
 	let ch = {}
-    ch.health = 1 // здоровье (потом разбить на составляющие)
-    ch.actionPower = 1 // максимальная сила, с которой можно выполнить действие (усталость мышц)
-    ch.muscularity = 0 // накачанность мышц (достигается тренировками)
-    ch.satiety = 1 // сытость
-    ch.water = 1 // потребность в воде
-    ch.freshness = 1 // выспанность, бодрость (потребность во сне)
+    ch._health = 1 // здоровье (потом разбить на составляющие)
+    ch._actionPower = 1 // максимальная сила, с которой можно выполнить действие (усталость мышц)
+    ch._muscularity = 0 // накачанность мышц (достигается тренировками)
+    ch._satiety = 1 // сытость
+    ch._water = 1 // потребность в воде
+    ch._freshness = 1 // выспанность, бодрость (потребность во сне)
 
-    ch.gender = params.gender
-    ch.race = params.race
+    ch._gender = params.gender
+    ch._race = params.race
     ch.birthDate = params.birthDate
-    ch.status = params.status
+    ch._status = params.status
 
     // внешний вид
-	//shortfur-averageheight-athlete
 	let rand = function(array) {
 		return array[Math.floor(array.length * Math.random())]
 	}
@@ -104,15 +107,23 @@ function createCharacter(params) {
     	}
     	else ch.exterior[gene] = [rand(opts), rand(opts)]
     }
+	let faceVariants = {shortfur:1, averagefur:2, longfur:2}
+	let arr = ch.exterior.fur
+	let chFur = allels.fur.combine(allels.fur.options, arr[0], arr[1], ch.exterior)
+	let chFaceVariants = faceVariants[chFur]
+	ch.exterior.face = (chFaceVariants >= 2) ? 1+Math.floor(Math.random()*chFaceVariants) : ''
 
     bindCharacterMethods(ch)
-    ch.name = generateName(ch.exterior)
+    ch._name = generateName(ch.exterior)
     return ch
 }
 
 function bindCharacterMethods(ch) {
 	ch.getAge = function() {
-		getAge(ch.birthDate, game.date)
+		return getAge(ch.birthDate, game.date)
+	}
+	ch.prettyPrintAge = function() {
+		return prettyPrintAge(ch.getAge())
 	}
 	ch.exterior.get = function(geneName) {
 		let arr = ch.exterior[geneName]
@@ -124,18 +135,18 @@ function bindCharacterMethods(ch) {
 		let spots = 'models/spots/'
 
 		let bodyShape = ''
-		//+длина шерсти, лицо
+		bodyShape += ch.exterior.get('fur') + ch.exterior.face + '-'
 		bodyShape += ch.exterior.get('height') + '-'
 
-		if (ch.muscularity < 0.33) bodyShape += 'тощий-'
-		else if (ch.muscularity < 0.75) bodyShape += 'норм-'
+		if (ch.muscularity < 0.33) bodyShape += 'skinny-'
+		else if (ch.muscularity < 0.75) bodyShape += 'normal-'
 		else bodyShape += 'athlete-'
 
 		let age = ch.getAge()
-		if (age < 0.4) bodyShape += 'слепойкотенок'
-		else if (age < 4) bodyShape += '3месячный'
+		if (age < 0.4) bodyShape += 'newborn'
+		else if (age < 4) bodyShape += 'kitten'
 		else if (age < 12*12) bodyShape += 'adult'
-		else bodyShape += 'старый'
+		else bodyShape += 'old'
 
 		let w = ch.exterior.get('white')
 		if (w == 'W') {
@@ -176,8 +187,6 @@ exports.startNewGame = function(params) {
     game.savedActivityBg = null
     game.difficulty_level = params.difficulty.charAt(params.difficulty.length-1) * 1
     game.map = params.era
-    game.sublocation = params.race + "_camp"
-    game.activity = "start_0"
 
     // текущая дата и день рождения
     let birthDate = 0;
@@ -197,7 +206,23 @@ exports.startNewGame = function(params) {
     } else {
     	birthDate = new Date(birthDate + randomShift + 3*season)
     }
-    game.date = birthDate
+    game._date = birthDate
+    game.printAtmoDate = function() {
+    	return printAtmoDate(game._date)
+    }
+    game.textAtmoDate = function() {
+    	return textAtmoDate(game._date)
+    }
+    game.getSeason = function() {
+    	let s = ''
+    	switch (game._date.getMonth()) {
+    		case 11: case 0: case 1: s = 'winter'; break;
+    		case 2: case 3: case 4: s = 'spring'; break;
+    		case 5: case 6: case 7: s = 'summer'; break;
+    		case 8: case 9: case 10: s = 'autumn'; break;
+    	}
+    	return s
+    }
     // персонаж
     game.actor = createCharacter({
     	race: params.race,
@@ -207,7 +232,11 @@ exports.startNewGame = function(params) {
     	status: 'kit'
     })
 
+    game._activity = "map"+game.map+"."+game.actor._race+"_camp"
+    game._sublocation = game.actor._race + "_camp"
+
     log(game)
+    buildInterface()
 }
 
 exports.loadGame = function(gameObj) {
@@ -215,5 +244,54 @@ exports.loadGame = function(gameObj) {
 }
 
 exports.stringifyCurrentGame = function() {
-	return JSON.stringify(game)
+	game.savedTimestamp = new Date().getTime()
+	game.date = game.date.getTime()
+	game.actor.birthDate = game.actor.birthDate.getTime()
+	let str = JSON.stringify(game)
+	game.savedTimestamp = new Date(game.savedTimestamp)
+	game.date = new Date(game.date)
+	game.actor.birthDate = new Date(game.actor.birthDate)
+	return str
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+
+function buildInterface() {
+	var con = document.body
+	var interface = document.createElement('div')
+	interface.className = 'effect_layer'
+	var textView = document.createElement('div')
+	textView.className = 'text_view game_view_block'
+	textView.innerHTML = 'блок текста'
+	interface.appendChild(textView)
+	var optView = document.createElement('div')
+	optView.className = 'opt_view game_view_block'
+	optView.innerHTML = 'опции'
+	interface.appendChild(optView)
+	var imgView = document.createElement('div')
+	imgView.className = 'img_view game_view_block'
+	interface.appendChild(imgView)
+
+	var info = document.createElement('div')
+	info.className = 'info_block game_view_block'
+	var dateBlock = document.createElement('div')
+	Object.defineProperty(game, 'date', {
+		get() {
+			return game._date;
+		},
+		set(value) {
+			game._date = value
+			dateBlock.appendChild(game.printAtmoDate())
+		}
+	});
+	game.skip = function(minutes) {
+		game.date = new Date(game.date.getTime() + minutes*60*1000)
+	}
+	let atmoDate = game.printAtmoDate()
+	atmoDate.className = 'date_block'
+	dateBlock.appendChild(atmoDate)
+	info.appendChild(dateBlock)
+	interface.appendChild(info)
+
+	con.appendChild(interface)
 }

@@ -1,0 +1,36 @@
+.text_view, .opt_view, .img_view, .info_block {
+    position: absolute;
+    overflow: auto;
+}
+
+.text_view {
+    left: 10px;
+    top: 10px;
+    width: calc(50vw - 40px);
+    height: calc(50vh - 40px);
+}
+
+.opt_view {
+    left: 10px;
+    top: 50vh;
+    width: calc(50vw - 40px);
+    height: calc(50vh - 40px);
+}
+
+.img_view {
+    left: 50vw;
+    top: 10px;
+    width: calc(50vw - 40px);
+    height: calc(50vh - 40px);
+}
+
+.info_block {
+    left: 50vw;
+    top: 50vh;
+    width: calc(50vw - 40px);
+    height: calc(50vh - 40px);
+}
+
+.date_block {
+	height: 30px;
+}

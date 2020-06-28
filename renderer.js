@@ -160,20 +160,6 @@ function createSpacer() {
     return div
 }
 
-// загрузочный экран
-function loadingScreen() {
-    let con = document.body;
-    con.style.backgroundImage = "url('textures/trilobite.jpg')"
-    let loading = document.createElement('div')
-    loading.innerHTML = _('loading')
-    loading.className = 'loading_screen game_view_block'
-    con.appendChild(loading)
-}
-
-function removeLoadingScreen() {
-    con.children[0].remove();
-}
-
 function mainMenu() {
     if (sound.ready) {
         if (!sound.tagsByName['main_menu_loop']) sound.play('main_menu_loop', true, true, 2)
@@ -193,6 +179,17 @@ function mainMenu() {
     var mm = document.createElement('div');
     mm.id = "main_menu"
     mm.appendChild(createSpacer())
+
+    var loading = null
+    // загрузочный экран
+    function loadingScreen() {
+        let con = document.body;
+        con.style.backgroundImage = "url('textures/trilobite.jpg')"
+        loading = document.createElement('div')
+        loading.innerHTML = _('loading')
+        loading.className = 'loading_screen game_view_block'
+        con.appendChild(loading)
+    }
 
     // функция, рекурсивно превращающая иерархически структурированный объект data в DOM Element в виде ПДА
     function createPdaElementFromData(data, type, preopened) {
@@ -344,7 +341,7 @@ function mainMenu() {
             nameBlock.innerHTML = gameName;
             let savedTimestamp = document.createElement('div');
             savedTimestamp.className = 'saved_game_timestamp';
-            savedTimestamp.innerHTML = printDate(new Date(game.savedTimestamp));
+            savedTimestamp.innerHTML = printDate(new Date(game.savedTimestamp*1));
             nameBlock.appendChild(savedTimestamp)
             nameBlock.title = _('saved_game_name_block_title').format(gameName, savedTimestamp.innerHTML);
 
@@ -358,7 +355,7 @@ function mainMenu() {
             actorName.innerHTML = game.actor.name;
             let age = document.createElement('div');
             age.className = 'saved_game_age';
-            age.innerHTML = prettyPrintAge(getAge(new Date(game.actor.birthDate), new Date(game.date)));
+            age.innerHTML = prettyPrintAge(getAge(new Date(game.actor.birthDate*1), new Date(game.date)));
             let gameDate = document.createElement('div');
             gameDate.className = 'saved_game_date';
             gameDate.appendChild(printAtmoDate(new Date(game.date)));
@@ -367,7 +364,7 @@ function mainMenu() {
             actorBlock.appendChild(age)
             actorBlock.appendChild(gameDate)
             actorBlock.title = _('saved_game_actor_block_title')
-                .format(game.actor.name, age.innerHTML, textAtmoDate(new Date(game.date)));
+                .format(game.actor.name, age.innerHTML, textAtmoDate(new Date(game.date*1)));
 
             leftColumn.appendChild(nameBlock)
             leftColumn.appendChild(actorBlock)
@@ -635,6 +632,8 @@ function mainMenu() {
                     mm.remove()
                     loadingScreen()
                     game.startNewGame(params)
+                    loading.remove()
+                    sound.clearSingleInstance('main_menu_loop', 2);
                 } else {
                     let warnings = _('warning_not_enough_data_new_game');
                     if (!params.gender) warnings += '\n' + _('warning_enter_gender');
@@ -700,6 +699,7 @@ function mainMenu() {
             deleteButton.setAttribute('disabled', 'disabled')
             let loadButton = createButton(_('load_saved_game'), function() {
                 mm.remove()
+                effectLayer.remove()
                 loadingScreen()
                 let filepath = selectedSavedGame.dataset.path;
                 fs.readFile(filepath, 'utf-8', function(readFileErr, content) {
@@ -717,15 +717,17 @@ function mainMenu() {
                         } else if (!validJson) {
                             alert(_('error_load_saved_game_corrupted').format(filepath))
                         }
-                        removeLoadingScreen();
+                        loading.remove()
                         mainMenu();
                     } else {
                         try {
                             game.loadGame()
-                            sound.clearSingleInstance('main_menu_loop');
+                            sound.clearSingleInstance('main_menu_loop', 2);
+                            loading.remove()
                         } catch (corrupted) {
+                            log(corrupted)
                             alert(_('error_load_saved_game_corrupted').format(filepath))
-                            removeLoadingScreen();
+                            loading.remove()
                             mainMenu();
                         }
                     }
