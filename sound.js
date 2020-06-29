@@ -15,11 +15,17 @@ fs.readdir(path.join(__dirname, 'sound'), function(err, files) {
     exports.container.dispatchEvent(new Event('soundsystemready'))
     exports.ready = true
 });
-exports.play = function(name, singleInstance, loop, fadein, fadeoutOnEnd) {
+exports.play = function(name, singleInstance, extra) {
+    if (!extra) extra = {}
+    var loop = extra.loop
+    var fadein = extra.fadein
+    var fadeout = extra.fadeout
+    var sublocSpec = extra.sublocSpec
     function makeSound(s) {
         let elem = document.createElement("audio");
         elem.setAttribute("src", "sound/"+s+".mp3");
         elem.setAttribute("preload", "auto");
+        elem.dataset.sublocationSpecific = sublocSpec ? '1' : ''
         return elem;
     }
 
@@ -33,10 +39,15 @@ exports.play = function(name, singleInstance, loop, fadein, fadeoutOnEnd) {
     if (singleInstance) tagsByName[name] = tag;
 
     if (loop) tag.loop = true;
-    else tag.setAttribute("onended", "this.remove();");
+    else {
+        tag.addEventListener("ended", function(){
+            this.remove();
+            tagsByName[name] = null;
+        });
+    }
 
-    var fadeOutPoint = tag.duration - fadeoutOnEnd
-    if (!loop && fadeoutOnEnd > 0) {
+    var fadeOutPoint = tag.duration - fadeout
+    if (!loop && fadeout > 0) {
         tag.addEventListener('timeupdate', function(){
             if (tag.currentTime >= fadeOutPoint)
             var fadeOut = setInterval(function() {
@@ -46,7 +57,7 @@ exports.play = function(name, singleInstance, loop, fadein, fadeoutOnEnd) {
                     tag.volume = 0.0
                     clearInterval(fadeOut);
                 }
-            }, (fadeoutOnEnd*1000)/100);
+            }, (fadeout*1000)/100);
         }, )
     }
 
@@ -64,6 +75,7 @@ exports.play = function(name, singleInstance, loop, fadein, fadeoutOnEnd) {
         })
     }
     tag.play();
+    return tag;
 }
 exports.clearSingleInstance = function(name, fadeout) {
     let tag = tagsByName[name];
@@ -88,7 +100,7 @@ exports.clearSingleInstance = function(name, fadeout) {
             tag.remove();
             tagsByName[name] = null;
         }
-    } else log('Tried to clear single-instance sound that doesn\'t exist: "'+name+'"');
+    }// else log('Tried to clear single-instance sound that doesn\'t exist: "'+name+'"');
 }
 exports.setLoopSingleInstance = function(name, loop) {
     let tag = tagsByName[name];
@@ -109,7 +121,7 @@ exports.pauseSingleInstance = function(name, fadeout) {
                 }
             }, (fadeout*1000)/100);
         } else tag.pause();
-    } else log('Tried to pause single-instance sound that doesn\'t exist: "'+name+'"');
+    }// else log('Tried to pause single-instance sound that doesn\'t exist: "'+name+'"');
 }
 exports.resumeSingleInstance = function(name, fadein) {
     let tag = tagsByName[name];
@@ -130,11 +142,29 @@ exports.resumeSingleInstance = function(name, fadein) {
         } else tag.play();
     } else log('Tried to resume single-instance sound that doesn\'t exist: "'+name+'"');
 }
+exports.clear = function(nameList) {
+    let con = exports.container.children;
+    let i = 0;
+    while (i < con.length) {
+        let name = con[i].src.split('/')
+        name = name[name.length - 1]
+        name = name.substring(0, name.length - 4)
+        if (nameList.indexOf(name) >= 0) {
+            tagsByName[name] = null;
+            con[i].pause();
+            con[i].remove();
+        } else i++;
+    }
+}
 exports.clearAll = function() {
     let con = exports.container.children;
-    for (let i = 0; i<con.length; i++) {
-        con[i].pause();
-        con[i].remove();
+    while (con.length > 0) {
+        let name = con[0].src.split('/')
+        name = name[name.length - 1]
+        name = name.substring(0, name.length - 4)
+        tagsByName[name] = null;
+        con[0].pause();
+        con[0].remove();
     }
 }
 exports.pauseAll = function() {
@@ -147,5 +177,24 @@ exports.resumeAll = function() {
     let con = exports.container.children;
     for (let i = 0; i<con.length; i++) {
         con[i].play();
+    }
+}
+exports.clearSublocationSpecific = function() {
+    log('sound.clearSublocationSpecific():')
+    let con = exports.container.children;
+    log(con)
+    let i = 0;
+    while (i < con.length) {
+        let name = con[i].src.split('/')
+        name = name[name.length - 1]
+        name = name.substring(0, name.length - 4)
+        //log(con[0])
+        log(name)
+        //log(con[0].dataset.sublocationSpecific == '1')
+        if (con[i].dataset.sublocationSpecific == '1') {
+            tagsByName[name] = null;
+            con[i].pause();
+            con[i].remove();
+        } else i++;
     }
 }

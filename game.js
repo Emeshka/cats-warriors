@@ -68,6 +68,8 @@ var allels = {
 }
 
 var game = null
+var gameTimeouts = []
+var sublocationTimeouts = []
 // УБРАТЬ экспорт когда не надо
 //exports.getGame = function() {return game}
 
@@ -234,6 +236,12 @@ exports.startNewGame = function(params) {
 
     game._activity = "map"+game.map+"."+game.actor._race+"_camp"
     game._sublocation = game.actor._race + "_camp"
+	game.setSublocationTimeout = function(func, timeout) {
+	    sublocationTimeouts.push(setTimeout(func, timeout))
+	}
+	game.setTimeout = function(func, timeout) {
+	    gameTimeouts.push(setTimeout(func, timeout))
+	}
 
     log(game)
     buildInterface()
@@ -260,21 +268,74 @@ function buildInterface() {
 	var con = document.body
 	var interface = document.createElement('div')
 	interface.className = 'effect_layer'
+
 	var textView = document.createElement('div')
 	textView.className = 'text_view game_view_block'
 	textView.innerHTML = 'блок текста'
-	interface.appendChild(textView)
 	var optView = document.createElement('div')
 	optView.className = 'opt_view game_view_block'
 	optView.innerHTML = 'опции'
-	interface.appendChild(optView)
 	var imgView = document.createElement('div')
 	imgView.className = 'img_view game_view_block'
-	interface.appendChild(imgView)
+	var testImg = document.createElement('img')
 
 	var info = document.createElement('div')
 	info.className = 'info_block game_view_block'
 	var dateBlock = document.createElement('div')
+	let atmoDate = game.printAtmoDate()
+	atmoDate.className = 'date_block'
+	dateBlock.appendChild(atmoDate)
+	info.appendChild(dateBlock)
+	var sublocBlock = document.createElement('div')
+	sublocBlock.className = 'subloc_block'
+	sublocBlock.innerHTML = _("loc_"+game._sublocation)
+	info.appendChild(sublocBlock)
+
+	var raceBlock = document.createElement('div')
+	raceBlock.className = 'race_block'
+	raceBlock.innerHTML = _(game.actor._race+"_race")
+	info.appendChild(raceBlock)
+
+	var sublocations = require(path.join(__dirname, 'activities/map'+game.map+'.js'));
+	var sublocList = Object.keys(sublocations.activities)
+	//log(sublocList)
+	var openMap = document.createElement('input')
+	openMap.type = 'button'
+	openMap.value = _('open_map')
+	openMap.onclick = function() {
+		var voile = document.createElement('div')
+		voile.className = 'voile effect_layer'
+		con.appendChild(voile)
+		var map = document.createElement('div')
+		map.className = 'map effect_layer'
+        let backBtn = document.createElement('div')
+        backBtn.className = 'tbook_back_btn'
+        backBtn.onclick = function() {
+            map.remove();
+            voile.remove();
+        }
+        map.appendChild(backBtn)
+        let ol = document.createElement('ol')
+        for (let i = 0; i<sublocList.length; i++) {
+        	let li = document.createElement('li')
+        	li.innerHTML = _("loc_"+sublocList[i])
+        	if (game.sublocation == sublocList[i]) li.className = 'temp_map_subloc_selected'
+        	else {
+        		li.onclick = function() {
+        			log('onclick')
+        			game.sublocation = sublocList[i]
+        			game.activity = "map"+game.map+"."+sublocList[i]
+		            map.remove();
+		            voile.remove();
+        		}
+        	}
+        	ol.appendChild(li)
+        }
+        map.appendChild(ol)
+		con.appendChild(map)
+	}
+	info.appendChild(openMap)
+
 	Object.defineProperty(game, 'date', {
 		get() {
 			return game._date;
@@ -287,11 +348,84 @@ function buildInterface() {
 	game.skip = function(minutes) {
 		game.date = new Date(game.date.getTime() + minutes*60*1000)
 	}
-	let atmoDate = game.printAtmoDate()
-	atmoDate.className = 'date_block'
-	dateBlock.appendChild(atmoDate)
-	info.appendChild(dateBlock)
-	interface.appendChild(info)
+	Object.defineProperty(game, 'activity', {
+		get() {
+			return game._activity;
+		},
+		set(value) {
+        	log('set activity')
+			game._activity = value
+			loadActivity()
+		}
+	});
+	Object.defineProperty(game, 'sublocation', {
+		get() {
+			return game._sublocation;
+		},
+		set(value) {
+        	log('set sublocation: clear timeouts')
+			for (let i = 0; i<sublocationTimeouts.length; i++) {
+				clearTimeout(sublocationTimeouts[i])
+			}
+			sublocationTimeouts = []
+        	log('set sublocation: clear specific sounds')
+			sound.clearSublocationSpecific()
+        	log('set sublocation')
+			game._sublocation = value
+			sublocBlock.innerHTML = _("loc_"+value)
+		}
+	});
 
+	Object.defineProperty(game.actor, 'race', {
+		get() {
+			return game.actor._race;
+		},
+		set(value) {
+			game.actor._race = value
+			raceBlock.innerHTML = _(value+"_race")
+		}
+	});
+
+	function loadActivity() {
+		let moduleActivity = game.activity.split('.')
+		var mod = require(path.join(__dirname, 'activities/'+moduleActivity[0]+'.js'));
+		mod.define(game)
+		var act = mod.activities[moduleActivity[1]]()
+
+		let args = act.doAndGetArgs()
+		let text = _(act.text.format.apply(act.text, args))
+		textView.innerHTML = text.format.apply(text, args)
+		var src = "activities_bg/" + act.img.format.apply(act.img, args)
+		testImg.onload = function() {
+			if (imgView.children.length > 0) {
+				for (let i = 0; i<imgView.children.length; i++) {
+					imgView.children[i].remove()
+				}
+			}
+			imgView.style.backgroundImage = "url('"+src+"')"
+		}
+		testImg.onerror = function() {
+			let imgLoadErrorIcon = document.createElement('div')
+			imgLoadErrorIcon.className = 'img_load_error_icon'
+			let imgLoadErrorAdvice = document.createElement('div')
+			imgLoadErrorAdvice.className = 'img_load_error_advice'
+			let imgLoadErrorAdviceHeader = document.createElement('h3')
+			imgLoadErrorAdviceHeader.innerHTML = _('img_load_error_advice_header')
+			let imgLoadErrorAdviceText = document.createElement('div')
+			imgLoadErrorAdviceText.innerHTML = _('img_load_error_advice_text')
+			imgLoadErrorAdvice.appendChild(imgLoadErrorAdviceHeader)
+			imgLoadErrorAdvice.appendChild(imgLoadErrorAdviceText)
+			imgView.style.backgroundImage = ""
+			imgView.appendChild(imgLoadErrorIcon)
+			imgView.appendChild(imgLoadErrorAdvice)
+		}
+		testImg.src = src
+	}
+	loadActivity()
+
+	interface.appendChild(textView)
+	interface.appendChild(optView)
+	interface.appendChild(imgView)
+	interface.appendChild(info)
 	con.appendChild(interface)
 }

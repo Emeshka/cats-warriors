@@ -18,7 +18,7 @@ function _(key) {
 document.title = _('app_name')
 
 window.sound = require(path.join(__dirname, 'sound.js'))
-const game = require(path.join(__dirname, 'game.js'))
+const gameEngine = require(path.join(__dirname, 'game.js'))
 
 function quit() {
     const remote = require('electron').remote
@@ -162,10 +162,10 @@ function createSpacer() {
 
 function mainMenu() {
     if (sound.ready) {
-        if (!sound.tagsByName['main_menu_loop']) sound.play('main_menu_loop', true, true, 2)
+        if (!sound.tagsByName['main_menu_loop']) sound.play('main_menu_loop', true, {loop: true, fadein: 2})
     } else {
         sound.container.addEventListener('soundsystemready', function() {
-            sound.play('main_menu_loop', true, true, 2)
+            sound.play('main_menu_loop', true, {loop: true, fadein: 2})
             sound.container.removeEventListener('soundsystemready', arguments.callee);
         })
     }
@@ -631,7 +631,7 @@ function mainMenu() {
                 if (params.gender && params.difficulty && params.era && params.race && params.season) {
                     mm.remove()
                     loadingScreen()
-                    game.startNewGame(params)
+                    gameEngine.startNewGame(params)
                     loading.remove()
                     sound.clearSingleInstance('main_menu_loop', 2);
                 } else {
@@ -721,7 +721,7 @@ function mainMenu() {
                         mainMenu();
                     } else {
                         try {
-                            game.loadGame()
+                            gameEngine.loadGame()
                             sound.clearSingleInstance('main_menu_loop', 2);
                             loading.remove()
                         } catch (corrupted) {

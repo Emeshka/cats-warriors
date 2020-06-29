@@ -8,6 +8,7 @@
     top: 10px;
     width: calc(50vw - 40px);
     height: calc(50vh - 40px);
+    white-space: pre-wrap;
 }
 
 .opt_view {
@@ -22,6 +23,10 @@
     top: 10px;
     width: calc(50vw - 40px);
     height: calc(50vh - 40px);
+    background-position: center center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    white-space: pre-wrap;
 }
 
 .info_block {
@@ -33,4 +38,57 @@
 
 .date_block {
 	height: 30px;
+}
+
+.subloc_block {
+}
+
+.race_block {
+}
+
+.voile {
+	background-color: rgba(255, 255, 255, 0.5);
+}
+
+.map {
+	left: 10vw;
+	top: 10vh;
+	width:80vw;
+	height:80vh;
+	background-color: #333333;
+	border-radius: 5px;
+	border: 1px solid white;
+}
+
+.map ol {
+	color: white;
+	margin-left: 50px;
+}
+
+.map li:not(.temp_map_subloc_selected):hover {
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.img_load_error_icon {
+	display: inline-block;
+    background-position: center center;
+    background-size: contain;
+    background-repeat: no-repeat;
+	background-image: url('textures/img_load_error.png');
+	height: 100%;
+	width: 50%;
+	vertical-align: middle;
+}
+
+.img_load_error_advice {
+	display: inline-block;
+	vertical-align: middle;
+	max-width: 50%;
+	overflow: auto;
+}
+
+.img_load_error_advice h3 {
+	font-size: 140%;
+	border-bottom: 1px solid white;
 }
