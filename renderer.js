@@ -162,7 +162,7 @@ function createSpacer() {
 
 function mainMenu() {
     if (sound.ready) {
-        if (!sound.tagsByName['main_menu_loop']) sound.play('main_menu_loop', true, {loop: true, fadein: 2})
+        if (!sound.getSingleInstance('main_menu_loop')) sound.play('main_menu_loop', true, {loop: true, fadein: 2})
     } else {
         sound.container.addEventListener('soundsystemready', function() {
             sound.play('main_menu_loop', true, {loop: true, fadein: 2})
@@ -537,39 +537,20 @@ function mainMenu() {
             newGameParams.appendChild(difficulty)
             newGameParams.appendChild(difComment)
 
-            let eras = ['old', 'new']
-            var selectedEra = ''
-            var eraComment = document.createElement('p')
-            eraComment.innerHTML = _('era_choice')
-            for (let i = 0; i<eras.length; i++) {
-                let e = eras[i]
-                var era = document.createElement('input')
-                era.setAttribute('type', 'radio')
-                era.setAttribute('name', 'era')
-                era.value = e
-                var eraLabel = document.createElement('label')
-                eraLabel.appendChild(era)
-                eraLabel.innerHTML += _(e+'_era')
-                eraLabel.onclick = function() {
-                    if (selectedEra != e) {
-                        selectedEra = e
-                        eraComment.innerHTML = _(e+'_era_descr')
-                    }
-                }
-                newGameParams.appendChild(eraLabel)
-            }
-            newGameParams.appendChild(eraComment)
-
             var table = document.createElement('table')
             table.id = 'race_choice'
+            table.style.display = 'none'
+            table.className = 'need_to_choose'
             let cells = [
                 ['hurricane', 'mist'],
                 ['swamp', 'forest']
             ];
             var selectedRace = ''
             var raceName = document.createElement('h3')
+            raceName.style.display = 'none'
             raceName.innerHTML = _('none')
             var raceComment = document.createElement('p')
+            raceComment.style.display = 'none'
             raceComment.innerHTML = _('race_choice')
             for (let i = 0; i<cells.length; i++) {
                 var tr = document.createElement('tr')
@@ -577,9 +558,11 @@ function mainMenu() {
                     let race = cells[i][j]
                     var td = document.createElement('td')
                     td.id = race+'_td'
+                    if (race == 'swamp') td.style.visibility = 'hidden'
                     td.className = 'unselected_image_option'
                     td.style.backgroundImage = "url('textures/"+race+"_race_icon.png')"
                     td.onclick = function() {
+                        table.className = ''
                         if (selectedRace != race) {
                             let oldRace = document.getElementById(selectedRace+'_td')
                             if (oldRace) oldRace.className = 'unselected_image_option'
@@ -593,6 +576,49 @@ function mainMenu() {
                 }
                 table.appendChild(tr)
             }
+
+            var selectedEra = ''
+            let eras = ['old', 'new']
+            var eraComment = document.createElement('p')
+            eraComment.innerHTML = _('era_choice')
+            var eraContainer = document.createElement('div')
+            eraContainer.id = 'era_container'
+            eraContainer.className = 'need_to_choose'
+            for (let i = 0; i<eras.length; i++) {
+                let e = eras[i]
+                var era = document.createElement('input')
+                era.setAttribute('type', 'radio')
+                era.setAttribute('name', 'era')
+                era.value = e
+                var eraLabel = document.createElement('label')
+                eraLabel.appendChild(era)
+                eraLabel.innerHTML += _(e+'_era')
+                eraLabel.onclick = function() {
+                    eraContainer.className = ''
+                    if (selectedEra != e) {
+                        table.style.display = 'table'
+                        raceName.style.display = 'block'
+                        raceComment.style.display = 'block'
+                        let swampCell = document.getElementById('swamp_td')
+                        if (e == 'old') swampCell.style.visibility = 'visible';
+                        else {
+                            if (selectedRace == 'swamp') {
+                                selectedRace = ''
+                                swampCell.className = 'unselected_image_option'
+                                table.className = 'need_to_choose'
+                                raceName.innerHTML = _('none')
+                                raceComment.innerHTML = _('race_choice')
+                            }
+                            swampCell.style.visibility = 'hidden';
+                        }
+                        selectedEra = e
+                        eraComment.innerHTML = _(e+'_era_descr')
+                    }
+                }
+                eraContainer.appendChild(eraLabel)
+            }
+            newGameParams.appendChild(eraContainer)
+            newGameParams.appendChild(eraComment)
             newGameParams.appendChild(table)
             newGameParams.appendChild(raceName)
             newGameParams.appendChild(raceComment)

@@ -77,6 +77,9 @@ exports.play = function(name, singleInstance, extra) {
     tag.play();
     return tag;
 }
+exports.getSingleInstance = function(name) {
+    return tagsByName[name]
+}
 exports.clearSingleInstance = function(name, fadeout) {
     let tag = tagsByName[name];
     if (tag) {
