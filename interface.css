@@ -18,6 +18,36 @@
     height: calc(50vh - 40px);
 }
 
+.activity_option {
+	padding: 10px;
+	cursor: pointer;
+}
+
+.activity_option:hover {
+	background-color: rgba(128, 128, 128, 0.2);
+}
+
+.option_error {
+	padding: 10px;
+	color: #ffcccc;
+}
+
+.option_disabled_reason {
+	color: #cccccc;
+}
+
+.option_in_group {
+	margin-left: 20px;
+}
+
+.option_group {
+	padding: 10px;
+}
+
+.option_group:hover {
+	background-color: rgba(128, 128, 128, 0.2);
+}
+
 .img_view {
     left: 50vw;
     top: 10px;

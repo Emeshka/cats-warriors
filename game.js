@@ -1,3 +1,4 @@
+exports.checkOptionTargetActivity = true
 const namesDB = require(path.join(__dirname, 'namesDB.js'));
 
 // аллели
@@ -296,25 +297,38 @@ function buildInterface() {
 	raceBlock.innerHTML = _(game.actor._race+"_race")
 	info.appendChild(raceBlock)
 
-	var sublocations = require(path.join(__dirname, 'activities/map'+game.map+'.js'));
-	var sublocList = Object.keys(sublocations.activities)
+	try {
+		var sublocations = require(path.join(__dirname, 'activities/map'+game.map+'.js'));
+		sublocations.define(game)
+	} catch (e) {
+		textView = _('error_require_activity_pack').format('activities/map'+game.map+'.js')
+		return;
+	}
+	var sublocList = []
+	var onLocationEnters = {}
+	for (let key in sublocations.activities) {
+		sublocList.push(key)
+		onLocationEnters[key] = sublocations.activities[key]().onLocationEnter
+	}
 	//log(sublocList)
 	var openMap = document.createElement('input')
 	openMap.type = 'button'
 	openMap.value = _('open_map')
-	openMap.onclick = function() {
+	var openMapFunction = function(arg) {
 		var voile = document.createElement('div')
 		voile.className = 'voile effect_layer'
 		con.appendChild(voile)
 		var map = document.createElement('div')
 		map.className = 'map effect_layer'
-        let backBtn = document.createElement('div')
-        backBtn.className = 'tbook_back_btn'
-        backBtn.onclick = function() {
-            map.remove();
-            voile.remove();
-        }
-        map.appendChild(backBtn)
+		if (arg instanceof Event) {
+	        let backBtn = document.createElement('div')
+	        backBtn.className = 'tbook_back_btn'
+	        backBtn.onclick = function() {
+	            map.remove();
+	            voile.remove();
+	        }
+	        map.appendChild(backBtn)
+	    }
         let ol = document.createElement('ol')
         for (let i = 0; i<sublocList.length; i++) {
         	let li = document.createElement('li')
@@ -322,7 +336,6 @@ function buildInterface() {
         	if (game.sublocation == sublocList[i]) li.className = 'temp_map_subloc_selected'
         	else {
         		li.onclick = function() {
-        			log('onclick')
         			game.sublocation = sublocList[i]
         			game.activity = "map"+game.map+"."+sublocList[i]
 		            map.remove();
@@ -334,6 +347,7 @@ function buildInterface() {
         map.appendChild(ol)
 		con.appendChild(map)
 	}
+	openMap.onclick = openMapFunction
 	info.appendChild(openMap)
 
 	Object.defineProperty(game, 'date', {
@@ -342,7 +356,10 @@ function buildInterface() {
 		},
 		set(value) {
 			game._date = value
-			dateBlock.appendChild(game.printAtmoDate())
+			dateBlock.innerHTML = ''
+			let atmoDate = game.printAtmoDate()
+			atmoDate.className = 'date_block'
+			dateBlock.appendChild(atmoDate)
 		}
 	});
 	game.skip = function(minutes) {
@@ -363,16 +380,20 @@ function buildInterface() {
 			return game._sublocation;
 		},
 		set(value) {
-        	log('set sublocation: clear timeouts')
-			for (let i = 0; i<sublocationTimeouts.length; i++) {
-				clearTimeout(sublocationTimeouts[i])
+			if (game._sublocation != value) {
+				if (sublocList.indexOf(value) < 0) {
+					textView = _('error_sublocation_absent').format(value, game.map)
+					return;
+				}
+				for (let i = 0; i<sublocationTimeouts.length; i++) {
+					clearTimeout(sublocationTimeouts[i])
+				}
+				sublocationTimeouts = []
+				sound.clearSublocationSpecific()
+				game._sublocation = value
+				onLocationEnters[value]()
+				sublocBlock.innerHTML = _("loc_"+value)
 			}
-			sublocationTimeouts = []
-        	log('set sublocation: clear specific sounds')
-			sound.clearSublocationSpecific()
-        	log('set sublocation')
-			game._sublocation = value
-			sublocBlock.innerHTML = _("loc_"+value)
 		}
 	});
 
@@ -388,13 +409,136 @@ function buildInterface() {
 
 	function loadActivity() {
 		let moduleActivity = game.activity.split('.')
-		var mod = require(path.join(__dirname, 'activities/'+moduleActivity[0]+'.js'));
+		let modSrc = 'activities/'+moduleActivity[0]+'.js'
+		try {
+			var mod = require(path.join(__dirname, modSrc));
+		} catch (e) {
+			textView = _('error_require_activity_pack').format(modSrc)
+			return;
+		}
 		mod.define(game)
-		var act = mod.activities[moduleActivity[1]]()
+		var act = mod.activities[moduleActivity[1]]
+		if (!act) {
+			textView = _('error_activity_absent').format(modSrc, moduleActivity[1])
+			return;
+		}
+		act = act()
 
 		let args = act.doAndGetArgs()
 		let text = _(act.text.format.apply(act.text, args))
 		textView.innerHTML = text.format.apply(text, args)
+
+		optView.innerHTML = ''
+		let options = []
+		let optionsByGroup = {}
+		if (act.options) {
+			options = act.options.filter(o => o.isVisible())
+			for (let i = 0; i<options.length; i++) {
+				let o = options[i]
+				if (o.group) {
+					if (!optionsByGroup[o.group]) optionsByGroup[o.group] = [];
+					optionsByGroup[o.group].push(o);
+				} else {
+					optionsByGroup[o.text] = o;
+				}
+			}
+		}
+		if (options.length > 0) {
+			let keys = Object.keys(optionsByGroup)
+			keys.sort(function(o1, o2) {
+				return Math.random()>0.5 ? 1 : -1
+			})
+			function optFromObject(obj) {
+				let opt = document.createElement('div')
+				let oText = _(obj.text.format.apply(obj.text, args))
+				oText = oText.format.apply(oText, args)
+				opt.innerHTML = '- ' + oText
+				opt.className = 'activity_option'
+				if (obj.gotoSublocation && sublocList.indexOf(obj.gotoSublocation) < 0) {
+					opt.className += ' option_error'
+					opt.innerHTML += _('o_invalid_target_sublocation').format(obj.gotoSublocation, game.map)
+				}
+				if (obj.goto && !obj.goto.startsWith('@') && exports.checkOptionTargetActivity) {
+					let tempModuleActivity = obj.goto.split('.')
+					let tempModSrc = 'activities/'+tempModuleActivity[0]+'.js'
+					try {
+						var tempMod = require(path.join(__dirname, tempModSrc));
+					} catch (e) {
+						opt.className += ' option_error'
+						opt.innerHTML += _('o_invalid_target_activity_pack').format(tempModSrc)
+						return opt
+					}
+					tempMod.define(game)
+					var tempAct = tempMod.activities[tempModuleActivity[1]]
+					if (!tempAct) {
+						opt.className += ' option_error'
+						opt.innerHTML += _('o_invalid_target_activity').format(tempModSrc)
+						return opt
+					}
+				}
+				if (!('isAbled' in obj) || obj.isAbled()) {
+					opt.onclick = function() {
+						if (obj.action) obj.action()
+						if (obj.goto.startsWith('@')) {
+							if (obj.goto == '@mapChoice') {
+								textView.innerHTML = ''
+								optView.innerHTML = ''
+								openMap.onclick();
+							}
+						} else game.activity = obj.goto;
+						if (obj.gotoSublocation) game.sublocation = obj.gotoSublocation;
+						else game.sublocation = game.sublocation
+					}
+				} else {
+					if (obj.disabledReason) {
+						let disReason = _(obj.disabledReason.format.apply(obj.disabledReason, args))
+						disReason = disReason.format.apply(disReason, args)
+						let spanReason = document.createElement('span')
+						spanReason.className = 'option_disabled_reason'
+						spanReason.innerHTML = disReason
+						opt.appendChild(spanReason)
+					}
+				}
+				if ('isAbled' in obj && !obj.disabledReason) {
+					let entire = obj.isAbled.toString();
+					let funcBody = entire.slice(entire.indexOf("{") + 1, entire.lastIndexOf("}"));
+					let spanReasonF = document.createElement('span')
+					spanReasonF.className = 'option_disabled_reason'
+					spanReasonF.innerHTML = funcBody
+					opt.appendChild(spanReasonF)
+					let spanReason = document.createElement('span')
+					spanReason.className = 'option_error'
+					spanReason.innerHTML = _('o_absent_disabled_reason').format(obj.text)
+					opt.appendChild(spanReason)
+				}
+				return opt
+			}
+			for (let i = 0; i<keys.length; i++) {
+				let key = keys[i]
+				let obj = optionsByGroup[key]
+				if (obj instanceof Array) {
+					let optionGroup = document.createElement('div')
+					optionGroup.className = 'option_group'
+					let oGroupText = _(key.format.apply(key, args))
+					oGroupText = oGroupText.format.apply(oGroupText, args)
+					optionGroup.innerHTML = oGroupText
+					for (let j = 0; j<obj.length; j++) {
+						let opt = optFromObject(obj[j])
+						opt.className += ' option_in_group'
+						optionGroup.appendChild(opt)
+					}
+					optView.appendChild(optionGroup)
+				} else {
+					let opt = optFromObject(obj)
+					optView.appendChild(opt)
+				}
+			}
+		} else {
+			var noAvailableOption = document.createElement('div')
+			noAvailableOption.className = 'option_error activity_option'
+			noAvailableOption.innerHTML = _('o_no_available_option').format(act.id)
+			optView.appendChild(noAvailableOption)
+		}
 		var src = "activities_bg/" + act.img.format.apply(act.img, args)
 		testImg.onload = function() {
 			if (imgView.children.length > 0) {
@@ -412,7 +556,7 @@ function buildInterface() {
 			let imgLoadErrorAdviceHeader = document.createElement('h3')
 			imgLoadErrorAdviceHeader.innerHTML = _('img_load_error_advice_header')
 			let imgLoadErrorAdviceText = document.createElement('div')
-			imgLoadErrorAdviceText.innerHTML = _('img_load_error_advice_text')
+			imgLoadErrorAdviceText.innerHTML = _('img_load_error_advice_text').format(src)
 			imgLoadErrorAdvice.appendChild(imgLoadErrorAdviceHeader)
 			imgLoadErrorAdvice.appendChild(imgLoadErrorAdviceText)
 			imgView.style.backgroundImage = ""
@@ -421,6 +565,7 @@ function buildInterface() {
 		}
 		testImg.src = src
 	}
+	onLocationEnters[game.sublocation]()
 	loadActivity()
 
 	interface.appendChild(textView)
