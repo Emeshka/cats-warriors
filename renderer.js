@@ -160,9 +160,15 @@ function createSpacer() {
     return div
 }
 
+var removeMainMenu = null
+
 function mainMenu() {
     if (sound.ready) {
-        if (!sound.getSingleInstance('main_menu_loop')) sound.play('main_menu_loop', true, {loop: true, fadein: 2})
+        //log('sound.ready')
+        if (!sound.getSingleInstance('main_menu_loop')) {
+            //log('main_menu_loop not playing')
+            sound.play('main_menu_loop', true, {loop: true, fadein: 2})
+        } //else log('mml IS playing')
     } else {
         sound.container.addEventListener('soundsystemready', function() {
             sound.play('main_menu_loop', true, {loop: true, fadein: 2})
@@ -177,6 +183,10 @@ function mainMenu() {
     //effectLayer.style.backgroundImage = "url('effects/wind_dust.webp')"
     con.appendChild(effectLayer)
     var mm = document.createElement('div');
+    removeMainMenu = function() {
+        mm.remove()
+        effectLayer.remove()
+    }
     mm.id = "main_menu"
     mm.appendChild(createSpacer())
 
@@ -655,7 +665,7 @@ function mainMenu() {
                     season: season.value
                 }
                 if (params.gender && params.difficulty && params.era && params.race && params.season) {
-                    mm.remove()
+                    removeMainMenu()
                     loadingScreen()
                     gameEngine.startNewGame(params)
                     loading.remove()
@@ -724,8 +734,7 @@ function mainMenu() {
             }, '40%', '30px')
             deleteButton.setAttribute('disabled', 'disabled')
             let loadButton = createButton(_('load_saved_game'), function() {
-                mm.remove()
-                effectLayer.remove()
+                removeMainMenu()
                 loadingScreen()
                 let filepath = selectedSavedGame.dataset.path;
                 fs.readFile(filepath, 'utf-8', function(readFileErr, content) {
@@ -771,8 +780,7 @@ function mainMenu() {
             mm.insertBefore(loadGameList, mm.firstChild)
         },
         function () {
-            mm.remove()
-            effectLayer.remove()
+            removeMainMenu()
 
             var tbookBlock = document.createElement('div')
             tbookBlock.className = "tbook_view effect_layer"

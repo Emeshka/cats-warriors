@@ -36,7 +36,10 @@ exports.play = function(name, singleInstance, extra) {
     }
     let tag = makeSound(name);
     exports.container.appendChild(tag);
-    if (singleInstance) tagsByName[name] = tag;
+    if (singleInstance) {
+        //log('play: singleInstance=', singleInstance, ', tag=', tag)
+        tagsByName[name] = tag;
+    }
 
     if (loop) tag.loop = true;
     else {
@@ -49,53 +52,68 @@ exports.play = function(name, singleInstance, extra) {
     var fadeOutPoint = tag.duration - fadeout
     if (!loop && fadeout > 0) {
         tag.addEventListener('timeupdate', function(){
-            if (tag.currentTime >= fadeOutPoint)
-            var fadeOut = setInterval(function() {
-                if (tag && exports.container.contains(tag) && (tag.volume > 0.01)) {
-                    if (!tag.paused) tag.volume -= 0.01;
-                } else {
-                    tag.volume = 0.0
-                    clearInterval(fadeOut);
-                }
-            }, (fadeout*1000)/100);
-        }, )
+            if (tag.currentTime >= fadeOutPoint) {
+                tag.dataset.fadeOut = '1'
+                var fadeOut = setInterval(function() {
+                    if (tag && exports.container.contains(tag) && (tag.volume > 0.01)) {
+                        if (!tag.paused) tag.volume -= 0.01;
+                    } else {
+                        tag.volume = 0.0
+                        clearInterval(fadeOut);
+                    }
+                }, (fadeout*1000)/100);
+            }
+        })
     }
 
     if (fadein > 0) {
         tag.volume = 0.0;
         tag.addEventListener('playing', function() {
             var fadeIn = setInterval(function() {
-                if (tag && exports.container.contains(tag) && (tag.volume < 0.99)) {
+                if (tag && exports.container.contains(tag) && (tag.volume < 0.99) && tag.dataset.fadeOut != '1') {
                     if (!tag.paused) tag.volume += 0.01;
-                } else {
+                } else if (tag.dataset.fadeOut != '1') {
                     tag.volume = 1.0
                     clearInterval(fadeIn);
-                }
+                } else clearInterval(fadeIn);
+                //log('fadein')
             }, (fadein*1000)/100);
         })
     }
     tag.play();
+    //log('play: tagsByName[name] =', tagsByName[name])
     return tag;
 }
 exports.getSingleInstance = function(name) {
+    //log('getSingleInstance: tagsByName[name] =', tagsByName[name])
     return tagsByName[name]
 }
 exports.clearSingleInstance = function(name, fadeout) {
     let tag = tagsByName[name];
+    //log('clearSingleInstance', name, tag)
     if (tag) {
         if (fadeout > 0) {
-            var fadeOut = setInterval(function() {
+            tag.dataset.fadeOut = '1'
+            var fadeOut = null
+            var remove = function() {
+                //log('remove')
+                tag.volume = 0.0
+                clearInterval(fadeOut);
+                if (tag) {
+                    tag.pause();
+                    tag.currentTime = 0;
+                    tag.remove();
+                    tagsByName[name] = null;
+                }
+            }
+            tag.addEventListener('pause', function() {
+                clearInterval(fadeOut);
+            })
+            fadeOut = setInterval(function() {
                 if (tag && exports.container.contains(tag) && (tag.volume > 0.01)) {
                     if (!tag.paused) tag.volume -= 0.01;
-                } else {
-                    tag.volume = 0.0
-                    clearInterval(fadeOut);
-                    if (tag) {
-                        tag.pause();
-                        tag.currentTime = 0;
-                        tag.remove();
-                    }
-                }
+                    //log('fadeout')
+                } else remove()
             }, (fadeout*1000)/100);
         } else {
             tag.pause();
@@ -114,6 +132,7 @@ exports.pauseSingleInstance = function(name, fadeout) {
     let tag = tagsByName[name];
     if (tag) {
         if (fadeout > 0) {
+            tag.dataset.fadeOut = '1'
             var fadeOut = setInterval(function() {
                 if (tag && exports.container.contains(tag) && (tag.volume > 0.01)) {
                     if (!tag.paused) tag.volume -= 0.01;
@@ -173,7 +192,15 @@ exports.clearAll = function() {
 exports.pauseAll = function() {
     let con = exports.container.children;
     for (let i = 0; i<con.length; i++) {
-        con[i].pause();
+        if (con[i].dataset.fadeOut == '1') {
+            //log('pauseAll: fadeout deletion', con[i])
+            let name = con[i].src.split('/')
+            name = name[name.length - 1]
+            name = name.substring(0, name.length - 4)
+            tagsByName[name] = null;
+            con[i].pause();
+            con[i].remove()
+        } else con[i].pause();
     }
 }
 exports.resumeAll = function() {
@@ -183,16 +210,16 @@ exports.resumeAll = function() {
     }
 }
 exports.clearSublocationSpecific = function() {
-    log('sound.clearSublocationSpecific():')
+    //log('sound.clearSublocationSpecific():')
     let con = exports.container.children;
-    log(con)
+    //log(con)
     let i = 0;
     while (i < con.length) {
         let name = con[i].src.split('/')
         name = name[name.length - 1]
         name = name.substring(0, name.length - 4)
         //log(con[0])
-        log(name)
+        //log(name)
         //log(con[0].dataset.sublocationSpecific == '1')
         if (con[i].dataset.sublocationSpecific == '1') {
             tagsByName[name] = null;

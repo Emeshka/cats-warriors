@@ -69,8 +69,9 @@ var allels = {
 }
 
 var game = null
-var gameTimeouts = []
-var sublocationTimeouts = []
+var gameTimeouts = {}
+var sublocationTimeouts = {}
+
 // УБРАТЬ экспорт когда не надо
 //exports.getGame = function() {return game}
 
@@ -238,10 +239,22 @@ exports.startNewGame = function(params) {
     game._activity = "map"+game.map+"."+game.actor._race+"_camp"
     game._sublocation = game.actor._race + "_camp"
 	game.setSublocationTimeout = function(func, timeout) {
-	    sublocationTimeouts.push(setTimeout(func, timeout))
+		var t = null;
+		var modFunc = function() {
+			func();
+			delete sublocationTimeouts[t];
+		};
+		t = setTimeout(modFunc, timeout);
+	    sublocationTimeouts[t] = [func, new Date().getTime() + timeout];
 	}
 	game.setTimeout = function(func, timeout) {
-	    gameTimeouts.push(setTimeout(func, timeout))
+		var t = null;
+		var modFunc = function() {
+			func();
+			delete gameTimeouts[t];
+		};
+		t = setTimeout(modFunc, timeout);
+	    gameTimeouts[t] = [func, new Date().getTime() + timeout];
 	}
 
     log(game)
@@ -370,7 +383,7 @@ function buildInterface() {
 			return game._activity;
 		},
 		set(value) {
-        	log('set activity')
+        	//log('set activity')
 			game._activity = value
 			loadActivity()
 		}
@@ -385,10 +398,11 @@ function buildInterface() {
 					textView = _('error_sublocation_absent').format(value, game.map)
 					return;
 				}
-				for (let i = 0; i<sublocationTimeouts.length; i++) {
-					clearTimeout(sublocationTimeouts[i])
+				for (let t in sublocationTimeouts) {
+					clearTimeout(t);
+					delete sublocationTimeouts[t];
 				}
-				sublocationTimeouts = []
+				sublocationTimeouts = {}
 				sound.clearSublocationSpecific()
 				game._sublocation = value
 				onLocationEnters[value]()
@@ -573,4 +587,62 @@ function buildInterface() {
 	interface.appendChild(imgView)
 	interface.appendChild(info)
 	con.appendChild(interface)
+
+	var interfaceOpened = true
+	var resumeGameTimeouts = []
+	var resumeSublocationTimeouts = []
+	document.addEventListener('keyup', function(event) {
+		if (event.code == 'Escape' && !event.ctrlKey && !event.metaKey && !event.shitfKey && !event.altKey) {
+			if (interfaceOpened) {
+				interface.style.display = 'none';
+				sound.pauseAll();
+				for (let t in gameTimeouts) {
+					clearTimeout(t);
+					let elem = [gameTimeouts[t][0], gameTimeouts[t][0] - new Date().getTime()];
+					resumeGameTimeouts.push(elem);
+					delete gameTimeouts[t];
+				}
+				for (let t in sublocationTimeouts) {
+					clearTimeout(t);
+					let elem = [sublocationTimeouts[t][0], sublocationTimeouts[t][1] - new Date().getTime()];
+					resumeSublocationTimeouts.push(elem);
+					delete sublocationTimeouts[t];
+				}
+				//log('resumeGameTimeouts:', resumeGameTimeouts)
+				//log('resumeSubTimeouts:', resumeSublocationTimeouts)
+				mainMenu();
+				interfaceOpened = false
+			} else {
+				removeMainMenu();
+                sound.clearSingleInstance('main_menu_loop', 2);
+				sound.resumeAll();
+        		con.style.backgroundImage = "url('textures/trilobite.jpg')";
+				interface.style.display = 'block';
+				for (let i = 0; i<resumeGameTimeouts.length; i++) {
+					let t = null
+					var func = resumeGameTimeouts[i][0]
+					let remTime = resumeGameTimeouts[i][1]
+					t = setTimeout(function() {
+						func();
+						delete gameTimeouts[t];
+					}, remTime)
+	    			gameTimeouts[t] = [func, new Date().getTime() + remTime];
+				}
+				for (let i = 0; i<resumeSublocationTimeouts.length; i++) {
+					let t = null
+					var func = resumeSublocationTimeouts[i][0]
+					let remTime = resumeSublocationTimeouts[i][1]
+					t = setTimeout(function() {
+						//log(typeof func, func)
+						func();
+						delete sublocationTimeouts[t];
+					}, remTime)
+	    			sublocationTimeouts[t] = [func, new Date().getTime() + remTime];
+				}
+				resumeGameTimeouts = []
+				resumeSublocationTimeouts = []
+				interfaceOpened = true
+			}
+		}
+	});
 }
