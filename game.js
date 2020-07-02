@@ -614,6 +614,7 @@ function buildInterface() {
 				interfaceOpened = false
 			} else {
 				removeMainMenu();
+				if (removeTbook) removeTbook();
                 sound.clearSingleInstance('main_menu_loop', 2);
 				sound.resumeAll();
         		con.style.backgroundImage = "url('textures/trilobite.jpg')";

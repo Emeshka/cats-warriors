@@ -80,7 +80,13 @@ exports.play = function(name, singleInstance, extra) {
             }, (fadein*1000)/100);
         })
     }
-    tag.play();
+    //tag.play();
+    var isPlaying = tag.currentTime > 0 && !tag.paused && !tag.ended 
+        && tag.readyState > 2;
+
+    if (!isPlaying) {
+      tag.play();
+    }
     //log('play: tagsByName[name] =', tagsByName[name])
     return tag;
 }
@@ -191,7 +197,10 @@ exports.clearAll = function() {
 }
 exports.pauseAll = function() {
     let con = exports.container.children;
-    for (let i = 0; i<con.length; i++) {
+    //log('pauseAll: con =', con)
+    let i = 0;
+    while (i < con.length) {
+        //log('pause: con[i] =', con[i])
         if (con[i].dataset.fadeOut == '1') {
             //log('pauseAll: fadeout deletion', con[i])
             let name = con[i].src.split('/')
@@ -200,7 +209,10 @@ exports.pauseAll = function() {
             tagsByName[name] = null;
             con[i].pause();
             con[i].remove()
-        } else con[i].pause();
+        } else {
+            con[i].pause();
+            i++;
+        }
     }
 }
 exports.resumeAll = function() {
@@ -210,7 +222,7 @@ exports.resumeAll = function() {
     }
 }
 exports.clearSublocationSpecific = function() {
-    //log('sound.clearSublocationSpecific():')
+    log('sound.clearSublocationSpecific():')
     let con = exports.container.children;
     //log(con)
     let i = 0;

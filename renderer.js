@@ -161,6 +161,7 @@ function createSpacer() {
 }
 
 var removeMainMenu = null
+var removeTbook = null
 
 function mainMenu() {
     if (sound.ready) {
@@ -784,6 +785,9 @@ function mainMenu() {
 
             var tbookBlock = document.createElement('div')
             tbookBlock.className = "tbook_view effect_layer"
+            removeTbook = function() {
+                tbookBlock.remove();
+            }
 
             let articleStructure = {
                 'about_tbook':1,
