@@ -413,6 +413,22 @@ input[type="button"]:hover {
 	line-height: 50px;
 }
 
+.create_new_save {
+	padding: 0px 10px;
+	width: calc(100% - 20px);
+}
+
+/*.create_new_save span {
+	vertical-align: middle;
+	display: inline-block;
+	width: 20%;
+}*/
+
+.create_new_save input {
+	vertical-align: middle;
+	width: calc(100% - 4px);
+}
+
 .saved_game_info_part {
 	height: 100%;
 	width: 87%;
@@ -440,18 +456,31 @@ input[type="button"]:hover {
 	text-overflow: ellipsis;
 }
 
+.saved_game_name_ellipsis {
+	display: inline-block;
+	overflow: hidden;
+	width: calc(100% - 160px);
+}
+
+.saved_game_name_ellipsis div {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	width: 100%;
+}
+
 .saved_game_actor {
 	height: 20px;
 	width: 100%;
 	overflow: hidden;
 }
 
-.saved_game_actor>div, .saved_game_actor>img {
+.saved_game_actor>div {
 	margin-right: 10px;
 }
 
 .saved_game_gender {
-	height: 10px;
+	height: 100%;
 	vertical-align: top;
 	width: auto;
 }
@@ -473,7 +502,9 @@ input[type="button"]:hover {
 	display: inline-block;
 	vertical-align: top;
 	float: right;
+	text-align: right;
 	color: grey;
+	width: 150px;
 }
 
 .saved_game_date {

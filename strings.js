@@ -10,6 +10,7 @@ exports.s = {
 	app_name: 'Квест по котам-воителям',
 	new_game: 'Новая игра',
 	load: 'Загрузить',
+	save: 'Сохранить',
 	travelersbookstart: 'Записи Путешественника',
 	exit: 'Выход',
 	none: '---',
@@ -85,13 +86,17 @@ exports.s = {
 	start_new_game_header:'Выберите параметры игры',
 	sure_to_exit:'Вы уверены, что хотите выйти из игры?',
 	load_game_header:'Загрузка сохранения',
+	save_game:'Сохранить игру',
+	save_game_header: 'Сохранение',
+	create_save_placeholder: 'Введите имя нового сохранения...',
+	confirm_overwrite_save: 'Вы уверены, что хотите перезаписать файл?',
 	nth_of_january:'{1} января',
 	nth_of_february:'{1} февраля',
 	nth_of_march:'{1} марта',
 	nth_of_april:'{1} апреля',
 	nth_of_may:'{1} мая',
 	nth_of_june:'{1} июня',
-	nth_of_july:'{1} июля',
+	nth_of_july:'{1} сентября',
 	nth_of_august:'{1} августа',
 	nth_of_september:'{1} сентября',
 	nth_of_october:'{1} октября',
@@ -109,8 +114,8 @@ exports.s = {
 	october:'октябрь',
 	november:'ноябрь',
 	december:'декабрь',
-	standard_time_format:'{1}:{2}:{3}',
-	standard_date_format:'{3} {2} {1}',
+	standard_time_format:'{1}:{2}',
+	standard_date_format:'{2} {1}',
 	atmo_date_format:'{1} {2}, {3}',
 	age_n_months:'{1} месяцев',
 	age_n_years_m_months:'{1} лет {2} месяцев',
@@ -157,6 +162,15 @@ exports.s = {
 		+' есть права на его чтение.',
 	error_load_saved_game_corrupted:'Невозможно прочитать сохраненную игру из файла {1}:'
 		+'\nфайл имеет неправильный формат. Восстановление невозможно, удалите этот файл.',
+	error_save_game:'Ошибка сохранения по пути {1}. Проверьте, что в папке с игрой в подпапке saves у вашего'
+		+' пользователя есть права на запись.',
+	error_empty_save_name:'Вы не ввели имя сохранения.',
+	error_forbidden_char_save_name:'Нельзя использовать символ {1} в имени сохранения.',
+	character_null:'null',
+	character_n:'переноса строки',
+	character_t:'табуляции',
+	character_r:'переноса каретки',
+	success_save_game:'Игра сохранена.',
 	saves_folder_is_empty:'Сохраненных игр нет. Начните новую игру!',
 	loading:'Загрузка...',
 	tbook:'Записки Путешественника',
@@ -175,6 +189,8 @@ exports.s = {
 		+' сообщением и воспользуйтесь инструкциями в меню "Справка" в статье "Как сообщить об ошибке?",'
 		+' чтобы оповестить нас об ошибке.',
 	open_map:'Открыть карту',
+	warning_escape_mm_choose_destination:'Вы не можете выйти в главное меню,'
+		+'\nне выбрав место назначения!',
 
 	/* ------------- Записи в Записках Путешественника ------------ */
 	about_tbook_pda_article:'Об этом курсе\nНедавно просмотрено: 71 979\nВ течение жизни мы постоянно'

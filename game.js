@@ -71,9 +71,9 @@ var allels = {
 var game = null
 var gameTimeouts = {}
 var sublocationTimeouts = {}
+var activityBg = ''
 
-// УБРАТЬ экспорт когда не надо
-//exports.getGame = function() {return game}
+exports.isGameLoaded = function() {return !!game}
 
 function generateName(exterior) {
 	return 'temp name'
@@ -89,7 +89,7 @@ function createCharacter(params) {
     ch._water = 1 // потребность в воде
     ch._freshness = 1 // выспанность, бодрость (потребность во сне)
 
-    ch._gender = params.gender
+    ch.gender = params.gender
     ch._race = params.race
     ch.birthDate = params.birthDate
     ch._status = params.status
@@ -265,13 +265,15 @@ exports.loadGame = function(gameObj) {
     //
 }
 
-exports.stringifyCurrentGame = function() {
+exports.stringifyGame = function() {
+	game.savedActivityBg = activityBg
+
 	game.savedTimestamp = new Date().getTime()
-	game.date = game.date.getTime()
+	game._date = game._date.getTime()
 	game.actor.birthDate = game.actor.birthDate.getTime()
 	let str = JSON.stringify(game)
 	game.savedTimestamp = new Date(game.savedTimestamp)
-	game.date = new Date(game.date)
+	game._date = new Date(game._date)
 	game.actor.birthDate = new Date(game.actor.birthDate)
 	return str
 }
@@ -327,11 +329,12 @@ function buildInterface() {
 	var openMap = document.createElement('input')
 	openMap.type = 'button'
 	openMap.value = _('open_map')
+	var map = null, voile = null, mapObligatory = false;
 	var openMapFunction = function(arg) {
-		var voile = document.createElement('div')
+		voile = document.createElement('div')
 		voile.className = 'voile effect_layer'
 		con.appendChild(voile)
-		var map = document.createElement('div')
+		map = document.createElement('div')
 		map.className = 'map effect_layer'
 		if (arg instanceof Event) {
 	        let backBtn = document.createElement('div')
@@ -341,7 +344,7 @@ function buildInterface() {
 	            voile.remove();
 	        }
 	        map.appendChild(backBtn)
-	    }
+	    } else mapObligatory = true;
         let ol = document.createElement('ol')
         for (let i = 0; i<sublocList.length; i++) {
         	let li = document.createElement('li')
@@ -353,6 +356,7 @@ function buildInterface() {
         			game.activity = "map"+game.map+"."+sublocList[i]
 		            map.remove();
 		            voile.remove();
+		            map = null, voile = null, mapObligatory = false;
         		}
         	}
         	ol.appendChild(li)
@@ -553,7 +557,9 @@ function buildInterface() {
 			noAvailableOption.innerHTML = _('o_no_available_option').format(act.id)
 			optView.appendChild(noAvailableOption)
 		}
-		var src = "activities_bg/" + act.img.format.apply(act.img, args)
+		let imgName = act.img.format.apply(act.img, args)
+		var src = "activities_bg/" + imgName
+		activityBg = imgName
 		testImg.onload = function() {
 			if (imgView.children.length > 0) {
 				for (let i = 0; i<imgView.children.length; i++) {
@@ -594,6 +600,15 @@ function buildInterface() {
 	document.addEventListener('keyup', function(event) {
 		if (event.code == 'Escape' && !event.ctrlKey && !event.metaKey && !event.shitfKey && !event.altKey) {
 			if (interfaceOpened) {
+				if (map) {
+					if (mapObligatory) alert(_('warning_escape_mm_choose_destination'));
+					else {
+						map.remove()
+						voile.remove()
+		            	map = null, voile = null, mapObligatory = false;
+					}
+					return;
+				}
 				interface.style.display = 'none';
 				sound.pauseAll();
 				for (let t in gameTimeouts) {

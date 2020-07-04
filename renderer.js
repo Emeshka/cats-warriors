@@ -44,9 +44,9 @@ function printDate(date) {
     let nth = _('nth_of_' + months[date.getMonth()]).format(date.getDate());
     let time = _('standard_time_format').format(
         date.getHours() < 10 ? '0'+date.getHours() : date.getHours(), 
-        date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes(), 
-        date.getSeconds() < 10 ? '0'+date.getSeconds() : date.getSeconds())
-    return _('standard_date_format').format(date.getFullYear(), nth, time);
+        date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes());
+    //    date.getSeconds() < 10 ? '0'+date.getSeconds() : date.getSeconds()
+    return _('standard_date_format').format(nth, time);
 }
 
 function textAtmoDate(date) {
@@ -191,6 +191,16 @@ function mainMenu() {
     mm.id = "main_menu"
     mm.appendChild(createSpacer())
 
+    let savesFolder = path.join(__dirname, 'saves')
+    if (!fs.existsSync(savesFolder)) {
+        fs.mkdir(savesFolder, {}, (err) => {
+            if (err) {
+                console.log('Unable to create directory: ' + err)
+                gameList.innerHTML = _('error_create_saves_directory');
+                quit()
+            }
+        });
+    }
     var loading = null
     // загрузочный экран
     function loadingScreen() {
@@ -347,12 +357,17 @@ function mainMenu() {
 
         if (game) {
             let gameName = filename.substring(0, filename.length - 5);
+            let gameNameEllipsis = document.createElement('div')
+            gameNameEllipsis.className = 'saved_game_name_ellipsis'
+            let gameNameBlock = document.createElement('div')
+            gameNameBlock.innerHTML = gameName
+            gameNameEllipsis.appendChild(gameNameBlock)
             let nameBlock = document.createElement('div');
             nameBlock.className = 'saved_game_name';
-            nameBlock.innerHTML = gameName;
+            nameBlock.appendChild(gameNameEllipsis);
             let savedTimestamp = document.createElement('div');
             savedTimestamp.className = 'saved_game_timestamp';
-            savedTimestamp.innerHTML = printDate(new Date(game.savedTimestamp*1));
+            savedTimestamp.innerHTML = printDate(new Date(game.savedTimestamp));
             nameBlock.appendChild(savedTimestamp)
             nameBlock.title = _('saved_game_name_block_title').format(gameName, savedTimestamp.innerHTML);
 
@@ -363,24 +378,24 @@ function mainMenu() {
             gender.src = "textures/"+game.actor.gender+"_icon.png";
             let actorName = document.createElement('div');
             actorName.className = 'saved_game_actor_name';
-            actorName.innerHTML = game.actor.name;
+            actorName.innerHTML = game.actor._name;
             let age = document.createElement('div');
             age.className = 'saved_game_age';
-            age.innerHTML = prettyPrintAge(getAge(new Date(game.actor.birthDate*1), new Date(game.date)));
+            age.innerHTML = prettyPrintAge(getAge(new Date(game.actor.birthDate), new Date(game._date)));
             let gameDate = document.createElement('div');
             gameDate.className = 'saved_game_date';
-            gameDate.appendChild(printAtmoDate(new Date(game.date)));
+            gameDate.appendChild(printAtmoDate(new Date(game._date)));
             actorBlock.appendChild(gender)
             actorBlock.appendChild(actorName)
             actorBlock.appendChild(age)
             actorBlock.appendChild(gameDate)
             actorBlock.title = _('saved_game_actor_block_title')
-                .format(game.actor.name, age.innerHTML, textAtmoDate(new Date(game.date*1)));
+                .format(game.actor._name, age.innerHTML, textAtmoDate(new Date(game._date)));
 
             leftColumn.appendChild(nameBlock)
             leftColumn.appendChild(actorBlock)
 
-            rightColumn.style.backgroundImage = "url('"+game.savedActivityBg+"')";
+            rightColumn.style.backgroundImage = "url('activities_bg/"+game.savedActivityBg+"')";
         } else {
             let corruptedSave = document.createElement('div')
             corruptedSave.innerHTML = filename+'<br>'+_('error_read_saved_game');
@@ -414,7 +429,6 @@ function mainMenu() {
         let gameList = document.createElement('div')
         gameList.className = 'main_menu_block_under_header'
         gameList.style.maxHeight = 'calc(100vh - 60px - 50px - 30px)';
-        let savesFolder = path.join(__dirname, 'saves')
         if (fs.existsSync(savesFolder)) {
             fs.readdir(savesFolder, {withFileTypes: true}, function(err, files) {
                 if (err) {
@@ -425,7 +439,30 @@ function mainMenu() {
                 if (!files.length) {
                     gameList.appendChild(emptySavedEntry())
                 } else {
-                    files.forEach(function(file) {
+                    files = files.map(function (tfn) {
+                        //log('tfn', tfn)
+                        return {
+                            dirent: tfn,
+                            time: fs.statSync(savesFolder + '/' + tfn.name).mtime.getTime()
+                        };
+                    }).sort(function (a, b) {
+                        return b.time - a.time;
+                    }).map(function (v) {
+                        return v.dirent;
+                    });
+                    //log(files)
+                    let list = []
+                    var len = 0
+                    function addEntryDelayed(entry, i) {
+                        list[i] = entry;
+                        len++;
+                        if (len >= files.length) {
+                            for (let i = 0; i<list.length; i++) {
+                                gameList.appendChild(list[i])
+                            }
+                        }
+                    }
+                    files.forEach(function(file, i) {
                         if (!file.isDirectory() && file.name.endsWith(".json")) {
                             let filepath = savesFolder + "/" + file.name;
                             fs.readFile(filepath, 'utf-8', function(readFileErr, content) {
@@ -436,19 +473,19 @@ function mainMenu() {
                                     console.log(parseError)
                                     validJson = false
                                 }
-                                let validGame = ('savedTimestamp' in object) && ('date' in object) 
-                                    && ('actor' in object) && ('sublocation' in object) 
+                                let validGame = ('savedTimestamp' in object) && ('_date' in object) 
+                                    && ('actor' in object) && ('_sublocation' in object) 
                                     && ('savedActivityBg' in object) && ('map' in object)
                                 if (readFileErr || !validJson || !validGame) {
                                     console.log('Unable to read saved game: readFileErr=' + readFileErr
                                         + ', validJson=' + validJson + ', validGame=' + validGame)
                                     entry = savedGameEntry(file.name, null, invalidEntryOnclick)
-                                    gameList.appendChild(entry)
+                                    addEntryDelayed(entry, i)
                                 } else {
                                     entry = savedGameEntry(file.name, object, entryOnclick)
                                 }
                                 entry.dataset.path = filepath;
-                                gameList.appendChild(entry)
+                                addEntryDelayed(entry, i)
                             });
                         }
                     });
@@ -478,14 +515,19 @@ function mainMenu() {
 
     var list = document.createElement('ul');
     list.className = "left_main_menu_panel"
-    var newGameBlock = null, loadGameList = null, helpBlock = null, credits = null;
-    var mainOptions = ['new_game', 'load', 'tbook', 'help', 'credits', 'exit'];
+    var newGameBlock = null, loadGameList = null, saveGameList = null, helpBlock = null, credits = null;
+    var mainOptions = ['new_game', 'load', 'save', 'tbook', 'help', 'credits', 'exit'];
     var onclicks = [
         function () {
             if (newGameBlock) return;
             if (loadGameList) {
                 loadGameList.remove();
                 loadGameList = null;
+                selectedSavedGame = null;
+            }
+            if (saveGameList) {
+                saveGameList.remove();
+                saveGameList = null;
                 selectedSavedGame = null;
             }
             if (credits) {
@@ -690,6 +732,11 @@ function mainMenu() {
         },
         function () {
             if (loadGameList) return;
+            if (saveGameList) {
+                saveGameList.remove();
+                saveGameList = null;
+                selectedSavedGame = null;
+            }
             if (newGameBlock) {
                 newGameBlock.remove();
                 newGameBlock = null;
@@ -781,6 +828,184 @@ function mainMenu() {
             mm.insertBefore(loadGameList, mm.firstChild)
         },
         function () {
+            if (saveGameList) return;
+            if (loadGameList) {
+                loadGameList.remove();
+                loadGameList = null;
+                selectedSavedGame = null;
+            }
+            if (newGameBlock) {
+                newGameBlock.remove();
+                newGameBlock = null;
+            }
+            if (credits) {
+                credits.remove();
+                credits = null;
+            }
+            if (helpBlock) {
+                helpBlock.remove();
+                helpBlock = null;
+            }
+
+            saveGameList = document.createElement('div')
+            saveGameList.className = "right_main_menu_panel game_view_block"
+
+            selectedSavedGame = null
+            var newSaveName = ''
+            var createSaveTextField = null;
+            let header = createHeader(_('save_game_header'))
+            header.style.display = 'block'
+            let createSavedGameListSave = function() {
+                return createSavedGameList(function() {
+                    deleteButton.removeAttribute('disabled')
+                    saveButton.removeAttribute('disabled')
+                    createSaveTextField.placeholder = _('create_save_placeholder')
+                    createSaveTextField.style.background = '#ffffff'
+                    let array = selectedSavedGame.dataset.path.split('/')
+                    let filename = array[array.length - 1]
+                    newSaveName = filename.substring(0, filename.length - 5)
+                    createSaveTextField.value = newSaveName
+                    return true;
+                }, function() {
+                    deleteButton.removeAttribute('disabled')
+                    saveButton.removeAttribute('disabled')
+                    return true;
+                })
+            }
+            let gameList = createSavedGameListSave()
+            function textfieldSave() {
+                let emptyCreateEntry = document.createElement('div')
+                emptyCreateEntry.className = 'saved_game_entry create_new_save'
+                /*let createNewSaveLabel = document.createElement('span')
+                createNewSaveLabel.innerHTML = _('create_save_label')
+                emptyCreateEntry.appendChild(createNewSaveLabel)
+                */
+                createSaveTextField = document.createElement('input')
+                createSaveTextField.id = Math.floor(Math.random()*1000) + ''
+                createSaveTextField.placeholder = _('create_save_placeholder')
+                createSaveTextField.oninput = function() {
+                    log('createSaveTextField oninput')
+                    log(newSaveName, createSaveTextField)
+                    createSaveTextField.placeholder = _('create_save_placeholder')
+                    createSaveTextField.style.background = '#ffffff'
+                    newSaveName = this.value
+                    if (selectedSavedGame) {
+                        selectedSavedGame.className = 'saved_game_entry';
+                        selectedSavedGame = null;
+                    }
+                    if (this.value != '') {
+                        deleteButton.setAttribute('disabled', 'disabled')
+                        saveButton.removeAttribute('disabled')
+                    } else {
+                        deleteButton.setAttribute('disabled', 'disabled')
+                        saveButton.setAttribute('disabled', 'disabled')
+                    }
+                    return true;
+                };
+                createSaveTextField.addEventListener('keyup', function(event) {
+                    log('createSaveTextField keyup')
+                    log(newSaveName, createSaveTextField)
+                    if (event.code == 'Enter') saveButton.onclick();
+                    return true;
+                });
+                createSaveTextField.addEventListener('blur', function(event) {
+                    log('createSaveTextField blur')
+                    log(newSaveName, createSaveTextField)
+                    return true;
+                });
+                emptyCreateEntry.appendChild(createSpacer())
+                emptyCreateEntry.appendChild(createSaveTextField)
+                gameList.insertBefore(emptyCreateEntry, gameList.firstChild)
+            }
+            textfieldSave()
+            let deleteButton = createButton(_('delete_saved_game'), function() {
+                let sure = confirm(_('sure_to_delete_saved_game'))
+                if (sure) {
+                    let filepath = selectedSavedGame.dataset.path;
+                    fs.unlink(filepath, (err) => {
+                        if (err) {
+                            console.log('Unable to delete saved game: ' + err)
+                            alert(_('error_delete_saved_game'))
+                        } else {
+                            selectedSavedGame.remove();
+                            if (gameList.children.length == 0) gameList.appendChild(emptySavedEntry())
+                            selectedSavedGame = null;
+                            deleteButton.setAttribute('disabled', 'disabled')
+                            saveButton.setAttribute('disabled', 'disabled')
+                        }
+                    });
+                }
+                return true;
+            }, '40%', '30px')
+            deleteButton.setAttribute('disabled', 'disabled')
+            var forbiddenArr = ['/', '\\', ':', '*', '?', '"', '<', '>', '|', '\0', '\n', '\t', '\r']
+            let saveButton = createButton(_('save_game'), function() {
+                //log(newSaveName)
+                log(newSaveName, createSaveTextField)
+                newSaveName = newSaveName.trim()
+                for (let i = 0; i<forbiddenArr.length; i++) {
+                    let ch = forbiddenArr[i];
+                    if (newSaveName.indexOf(ch) >= 0) {
+                        if (ch == '\0') ch = _('character_null');
+                        if (ch == '\n') ch = _('character_n');
+                        if (ch == '\t') ch = _('character_t');
+                        if (ch == '\r') ch = _('character_r');
+                        alert(_('error_forbidden_char_save_name').format(ch));
+                        log(newSaveName, createSaveTextField)
+                        return true;
+                    }
+                }
+                //log(newSaveName)
+                if (!newSaveName) {
+                    alert(_('error_empty_save_name'));
+                    log(newSaveName, createSaveTextField)
+                    return true;
+                }
+                if (!fs.existsSync(savesFolder)) {
+                    fs.mkdir(savesFolder, {}, (err) => {
+                        if (err) {
+                            console.log('Unable to create directory: ' + err)
+                            gameList.innerHTML = _('error_create_saves_directory');
+                            quit()
+                        }
+                    });
+                }
+                let savePath = savesFolder+'/'+newSaveName+'.json'
+                let allowWrite = (fs.existsSync(savePath) && confirm(_('confirm_overwrite_save')))
+                     || !fs.existsSync(savePath);
+                if (allowWrite) fs.writeFile(savePath, gameEngine.stringifyGame(), function(error){
+                    if (error) {
+                        log(error)
+                        createSaveTextField.placeholder = _('error_save_game')
+                        createSaveTextField.style.background = '#ffcccc'
+                        createSaveTextField.value = ''
+                    } else {
+                        createSaveTextField.placeholder = _('success_save_game')
+                        createSaveTextField.style.background = '#ccffcc'
+                        createSaveTextField.value = ''
+                    }
+                    selectedSavedGame = null
+                    newSaveName = ''
+                    deleteButton.setAttribute('disabled', 'disabled')
+                    saveButton.setAttribute('disabled', 'disabled')
+                    gameList.remove()
+                    gameList = createSavedGameListSave()
+                    textfieldSave()
+                    saveGameList.appendChild(gameList)
+                });
+                return true;
+            }, '40%', '30px')
+            saveButton.setAttribute('disabled', 'disabled')
+            let headerDiv = document.createElement('div')
+            headerDiv.style.borderBottom = '1px solid white';
+            headerDiv.appendChild(header)
+            headerDiv.appendChild(deleteButton)
+            headerDiv.appendChild(saveButton)
+            saveGameList.appendChild(headerDiv)
+            saveGameList.appendChild(gameList)
+            mm.insertBefore(saveGameList, mm.firstChild)
+        },
+        function () {
             removeMainMenu()
 
             var tbookBlock = document.createElement('div')
@@ -818,6 +1043,11 @@ function mainMenu() {
                 loadGameList = null;
                 selectedSavedGame = null;
             }
+            if (saveGameList) {
+                saveGameList.remove();
+                saveGameList = null;
+                selectedSavedGame = null;
+            }
             if (credits) {
                 credits.remove();
                 credits = null;
@@ -848,6 +1078,11 @@ function mainMenu() {
                 loadGameList = null;
                 selectedSavedGame = null;
             }
+            if (saveGameList) {
+                saveGameList.remove();
+                saveGameList = null;
+                selectedSavedGame = null;
+            }
             if (helpBlock) {
                 helpBlock.remove();
                 helpBlock = null;
@@ -871,14 +1106,15 @@ function mainMenu() {
             mm.insertBefore(credits, mm.firstChild)
         },
         function () {
-            let sure = confirm(_('sure_to_exit'))
+            let sure = confirm(_('sure_to_exit'));
             if (sure) quit();
         }
     ];
     for (let i = 0; i<mainOptions.length; i++) {
+        if (mainOptions[i] == 'save' && !gameEngine.isGameLoaded()) continue;
         let li = document.createElement('li');
-        li.appendChild(createButton(_(mainOptions[i]), onclicks[i]))
-        list.appendChild(li)
+        li.appendChild(createButton(_(mainOptions[i]), onclicks[i]));
+        list.appendChild(li);
     }
     mm.appendChild(list)
     con.appendChild(mm)
