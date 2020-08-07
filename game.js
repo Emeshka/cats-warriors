@@ -1,5 +1,6 @@
 exports.checkOptionTargetActivity = true
 const namesDB = require(path.join(__dirname, 'namesDB.js'));
+const SunCalc = require(path.join(__dirname, 'mourner-suncalc/suncalc.js'));
 
 // аллели
 var geneDominant = function(options, a1, a2) {
@@ -267,20 +268,46 @@ exports.loadGame = function(gameObj) {
 
 exports.stringifyGame = function() {
 	game.savedActivityBg = activityBg
+	game.savedTimestamp = new Date()
 
-	game.savedTimestamp = new Date().getTime()
-	game._date = game._date.getTime()
-	game.actor.birthDate = game.actor.birthDate.getTime()
-	let str = JSON.stringify(game)
+	/*game._date = game._date.getTime()
+	game.actor.birthDate = game.actor.birthDate.getTime()*
 	game.savedTimestamp = new Date(game.savedTimestamp)
 	game._date = new Date(game._date)
-	game.actor.birthDate = new Date(game.actor.birthDate)
+	game.actor.birthDate = new Date(game.actor.birthDate)*/
+	let str = JSON.stringify(game)
 	return str
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
 
 function buildInterface() {
+	//тест suncalc
+	let tempUTCDate = new Date(game._date.getFullYear(), game._date.getMonth(), game._date.getDate(),
+		0, 0, 0);
+	log(tempUTCDate)
+	let prev = null;
+    for (let i = 0; i<366; i++) {
+    	let tempDate = new Date(tempUTCDate.getTime() + i*24*60*60*1000)
+   		let offset = tempDate.getTimezoneOffset()
+    	log(i, tempDate, offset)
+    	tempDate = new Date(tempDate.getTime() - offset*60*1000)
+    	log(tempDate)
+    	let timesObject = SunCalc.getTimes(tempDate, 56, 38)//Moscow
+    	let sunriseDate = timesObject.sunrise
+    	let sunsetDate = timesObject.sunset
+    	let hours = (sunsetDate.getTime() - sunriseDate.getTime())/(60*60*1000)
+    	let moonPhase = SunCalc.getMoonIllumination(tempDate).phase
+    	if (i % 10 == 0) log(': daylength - '+hours.toFixed(1)
+    		+'\n\tsunrise: '+sunriseDate
+    		+'\n\tsunset: '+sunsetDate
+    		+'\n\tmoon phase: '+moonPhase);
+    	if (i > 0) {
+    		let delta = Math.abs(prev - hours);
+    		if (!(delta < 0.1)) log('INCORRECT: ', tempDate, delta);
+    	}
+   		prev = hours
+    }
 	var con = document.body
 	var interface = document.createElement('div')
 	interface.className = 'effect_layer'
