@@ -76,6 +76,31 @@ var activityBg = ''
 
 exports.isGameLoaded = function() {return !!game}
 
+function updateWeather() {
+	let weatherTypeRules = {
+		cloud: ['cloud', 'precipitation', 'sun_cloud'],
+		precipitation: ['precipitation', 'cloud', 'sun_precipitation'],
+		sun_cloud: ['sun_cloud', 'sun_precipitation', 'sun', 'cloud'],
+		sun_precipitation: ['sun_cloud', 'sun_precipitation', 'sun', 'precipitation'],
+		sun: ['sun', 'sun_cloud', 'sun_precipitation']
+	}
+
+	let rand = function(array) {
+		return array[Math.floor(array.length * Math.random())]
+	}
+	game.weather.type = rand(weatherTypeRules[game.weather.type])
+
+	//пока температура не привязана ко времени года и суток
+	let tDelta = (Math.random() > 0.5 ? 1 : -1)*(Math.random()*3);
+	game.weather.temperature = Math.max(-35, Math.min(35, game.weather.temperature + tDelta))
+
+	let humidityDelta = (Math.random() > 0.5 ? 1 : -1)*(Math.random()*0.2);
+	game.weather.humidity = Math.max(0, Math.min(
+		(game.weather.temperature < -1 ? 0.6 : 1),
+		game.weather.humidity + humidityDelta)
+	)
+}
+
 function generateName(exterior) {
 	return 'temp name'
 }
@@ -228,6 +253,20 @@ exports.startNewGame = function(params) {
     	}
     	return s
     }
+    game.lastWeatherUpdateDate = new Date(game._date)
+
+	let rand = function(array) {
+		return array[Math.floor(array.length * Math.random())]
+	}
+	game.weather = {}
+	game.weather.type = rand(['sun_cloud', 'sun_precipitation', 'cloud', 'sun', 'precipitation'])
+	//пока температура не привязана ко времени года и суток
+	game.weather.temperature = (Math.random() > 0.5 ? 1 : -1)*(Math.random()*35);
+	let humidity = Math.random();
+	game.weather.humidity = Math.min((game.weather.temperature < -1 ? 0.6 : 1), humidity)
+    game.weather.windSpeed = 30
+    game.weather.windDirection = 0 //откуда дует от 0 до 360, 0 - с севера, 90 - с востока, 180 - с юга, 270 - с запада
+
     // персонаж
     game.actor = createCharacter({
     	race: params.race,
@@ -283,7 +322,7 @@ exports.stringifyGame = function() {
 
 function buildInterface() {
 	//тест suncalc
-	let tempUTCDate = new Date(game._date.getFullYear(), game._date.getMonth(), game._date.getDate(),
+	/*let tempUTCDate = new Date(game._date.getFullYear(), game._date.getMonth(), game._date.getDate(),
 		0, 0, 0);
 	log(tempUTCDate)
 	let prev = null;
@@ -307,10 +346,127 @@ function buildInterface() {
     		if (!(delta < 0.1)) log('INCORRECT: ', tempDate, delta);
     	}
    		prev = hours
-    }
+    }*/
 	var con = document.body
 	var interface = document.createElement('div')
 	interface.className = 'effect_layer'
+
+	function dateTimeWeatherIndicator() {
+		var frame = document.createElement('div')
+		frame.className = 'dtwi_frame'
+
+		var clockBlueBg = document.createElement('div')
+		clockBlueBg.className = 'dtwi_time'
+		clockBlueBg.style.backgroundImage = "url('textures/clock_bluebg.png')"
+		frame.appendChild(clockBlueBg)
+		var sunCircle = document.createElement('div')
+		sunCircle.className = 'dtwi_time'
+		sunCircle.style.backgroundImage = "url('textures/clock_suncircle.png')"
+		frame.appendChild(sunCircle)
+
+    	let timesObject = SunCalc.getTimes(game._date, 56, 38)//Moscow
+    	let sunriseDate = timesObject.sunrise
+    	let sunsetDate = timesObject.sunset
+    	for (let i = 1; i<=24; i++) {
+    		let tempDate = new Date(game._date.getFullYear(), game._date.getMonth(), game._date.getDate(), i - 0.5)
+    		if (tempDate.getTime() < sunriseDate.getTime()) {
+    			//log(i+' is night hour before sunrise')
+    			let hour = (i < 10 ? '0' : '')+i
+				var nightHour = document.createElement('div')
+				nightHour.className = 'dtwi_time'
+				nightHour.style.backgroundImage = "url('textures/"+hour+"_nh.png')"
+				frame.appendChild(nightHour)
+				var nightHourSky = document.createElement('div')
+				nightHourSky.className = 'dtwi_time'
+				nightHourSky.style.backgroundImage = "url('textures/"+hour+"_nsky.png')"
+				frame.appendChild(nightHourSky)
+    		} else if (tempDate.getTime() > sunriseDate.getTime() && tempDate.getTime() > sunsetDate.getTime()) {
+    			//log(i+' is night hour after sunset')
+    			let hour = (i < 10 ? '0' : '')+i
+				var nightHour = document.createElement('div')
+				nightHour.className = 'dtwi_time'
+				nightHour.style.backgroundImage = "url('textures/"+hour+"_nh.png')"
+				frame.appendChild(nightHour)
+				var nightHourSky = document.createElement('div')
+				nightHourSky.className = 'dtwi_time'
+				nightHourSky.style.backgroundImage = "url('textures/"+hour+"_nsky.png')"
+				frame.appendChild(nightHourSky)
+    		}
+    	}
+
+    	let moonPhase = SunCalc.getMoonIllumination(game._date).phase
+    	let moonTextureNum = 1 + Math.floor(moonPhase*29)
+    	//log('moon texture number: ' + moonTextureNum + ', moonPhase: ' + moonPhase)
+		var moonPhaseView = document.createElement('div')
+		moonPhaseView.className = 'dtwi_time'
+		moonPhaseView.style.backgroundImage = "url('textures/moon_phase_"+moonTextureNum+".png')"
+		frame.appendChild(moonPhaseView)
+
+		var moonRelief = document.createElement('div')
+		moonRelief.className = 'dtwi_time'
+		moonRelief.style.backgroundImage = "url('textures/moon_relief.png')"
+		frame.appendChild(moonRelief)
+		var tiFrame = document.createElement('div')
+		tiFrame.className = 'dtwi_time'
+		tiFrame.style.backgroundImage = "url('textures/time_indicator_frame.png')"
+		frame.appendChild(tiFrame)
+
+		var degree = game._date.getHours()*(360/24)
+		var timeArrow = document.createElement('div')
+		timeArrow.className = 'dtwi_time'
+		timeArrow.style.backgroundImage = "url('textures/time_indicator_arrow.png')"
+		timeArrow.style.transform = "rotate("+degree+"deg)"
+		frame.appendChild(timeArrow)
+
+		//погода
+		let weatherIcon = ''
+		if (game.weather.humidity > 0.75) {
+			if (game.weather.type == 'sun') {
+				weatherIcon = 'sun_fog'
+			} else if (game.weather.type == 'sun_cloud' || game.weather.type == 'cloud') {
+				weatherIcon = 'fog'
+			} else {
+				weatherIcon = 'fog_rain'
+			}
+		} else {
+			if (game.weather.type == 'sun') {
+				weatherIcon = 'sun'
+			} else if (game.weather.type == 'cloud') {
+				weatherIcon = 'cloud'
+			} else if (game.weather.type == 'sun_cloud') {
+				weatherIcon = 'sun_cloud'
+			} else if (game.weather.type == 'precipitation') {
+				if (game.weather.temperature < -1) {
+					weatherIcon = 'snow'
+				} else if (game.weather.temperature > 1) {
+					weatherIcon = 'rain'
+				} else {
+					weatherIcon = 'snow_rain'
+				}
+			} else if (game.weather.type == 'sun_precipitation') {
+				if (game.weather.temperature < -1) {
+					weatherIcon = 'sun_snow'
+				} else if (game.weather.temperature > 1) {
+					weatherIcon = 'sun_rain'
+				} else {
+					weatherIcon = 'sun_snow_rain'
+				}
+			}
+		}
+		var weatherView = document.createElement('div')
+		weatherView.className = 'dtwi_weather'
+		weatherView.style.backgroundImage = "url('textures/weather_"+weatherIcon+".png')"
+		frame.appendChild(weatherView)
+
+		//ветер
+		//время года
+		var tempPrintDate = document.createElement('div')
+		tempPrintDate.className = 'dtwi_time'
+		tempPrintDate.innerHTML = printDate(game._date)
+		frame.appendChild(tempPrintDate)
+
+		return frame
+	}
 
 	var textView = document.createElement('div')
 	textView.className = 'text_view game_view_block'
@@ -325,9 +481,8 @@ function buildInterface() {
 	var info = document.createElement('div')
 	info.className = 'info_block game_view_block'
 	var dateBlock = document.createElement('div')
-	let atmoDate = game.printAtmoDate()
-	atmoDate.className = 'date_block'
-	dateBlock.appendChild(atmoDate)
+	dateBlock.className = 'date_block'
+	dateBlock.appendChild(dateTimeWeatherIndicator())
 	info.appendChild(dateBlock)
 	var sublocBlock = document.createElement('div')
 	sublocBlock.className = 'subloc_block'
@@ -400,10 +555,24 @@ function buildInterface() {
 		},
 		set(value) {
 			game._date = value
+			let hoursAfterWeatherUpdate = (value.getTime() - game.lastWeatherUpdateDate.getTime())/(60*60*1000)
+			//log(hoursAfterWeatherUpdate)
+			for (let i = 1; i<hoursAfterWeatherUpdate; i+=3) {
+				updateWeather()
+				//log('update weather ' + i)
+			}
+			if (hoursAfterWeatherUpdate >= 1) {
+				game.lastWeatherUpdateDate = new Date(
+					game.lastWeatherUpdateDate.getFullYear(),
+					game.lastWeatherUpdateDate.getMonth(),
+					game.lastWeatherUpdateDate.getDate(),
+					game.lastWeatherUpdateDate.getHours() + Math.floor(hoursAfterWeatherUpdate),
+					game.lastWeatherUpdateDate.getMinutes(),
+					game.lastWeatherUpdateDate.getSeconds()
+				)
+			}
 			dateBlock.innerHTML = ''
-			let atmoDate = game.printAtmoDate()
-			atmoDate.className = 'date_block'
-			dateBlock.appendChild(atmoDate)
+			dateBlock.appendChild(dateTimeWeatherIndicator())
 		}
 	});
 	game.skip = function(minutes) {
