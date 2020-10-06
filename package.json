@@ -18,7 +18,7 @@
   "author": "Alexandra Emelina",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^8.3.0",
+    "electron": "^8.5.1",
     "electron-packager": "^14.2.1"
   }
 }
